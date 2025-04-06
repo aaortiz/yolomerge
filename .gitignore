@@ -175,3 +175,7 @@ cython_debug/
 
 # MacOS
 .DS_Store
+
+# Node
+node_modules/
+build/
