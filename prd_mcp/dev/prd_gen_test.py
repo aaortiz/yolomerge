@@ -1,15 +1,13 @@
+import asyncio
+
 import pydantic_ai as pai
 from httpx import AsyncClient
 from loguru import logger
-from mcp.server import fastmcp as fm
 from pydantic_ai.models.gemini import GeminiModel
 from pydantic_ai.providers.google_gla import GoogleGLAProvider
 from pydantic_ai.settings import ModelSettings
 
 from prd_mcp.config import get_config
-
-mcp = fm.FastMCP(name="prd_mcp")
-
 
 config = get_config()
 
@@ -30,12 +28,6 @@ agent = pai.Agent(
 )
 
 
-@mcp.tool()
-async def is_live() -> str:
-    """Check if the PRD MCP is live."""
-    return "PRD MCP is live!"
-
-
 prd_prompt = """
 Some inexperienced developers wrote a lot of code in direct communication with the user. You won't get another chance to get that kind of contact again, so now you have to figure out what the user's requirements are.
 
@@ -48,17 +40,19 @@ Here is the code base:
 """.strip()
 
 
-@mcp.tool()
-async def create_prd(code_base: str) -> str:
+async def create_prd() -> str:
     """Create a new product requirements document based on the code base.
 
     Args:
         code_base: The code base to create the product requirements document from, in markdown format.
     """
+    with open("dev/code_base.txt") as file:
+        code_base = file.read()
+        logger.debug(len(code_base))
     response = await agent.run(prd_prompt.format(code_base=code_base))
+    logger.debug(response.data)
     return response.data
 
 
-if __name__ == "__main_":
-    logger.debug("starting mcp")
-    mcp.run()
+if __name__ == "__main__":
+    asyncio.run(create_prd())
