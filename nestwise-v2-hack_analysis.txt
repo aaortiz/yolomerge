@@ -1,0 +1,1969 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+Archive/
+  PricingCTA.tsx
+  TestimonialCarousel.tsx
+prisma/
+  schema.prisma
+scripts/
+  deploy
+src/
+  app/
+    api/
+      trpc/
+        [trpc]/
+          route.ts
+    layout.tsx
+    page.tsx
+  components/
+    DashboardMockup.tsx
+    EnhancedDashboard.tsx
+    PricingCTA.tsx
+    TestimonialCarousel.tsx
+  server/
+    api/
+      root.ts
+      trpc.ts
+    db.ts
+  styles/
+    globals.css
+  trpc/
+    query-client.ts
+    react.tsx
+    server.ts
+  env.js
+.gitignore
+next-env.d.ts
+next.config.js
+package.json
+postcss.config.cjs
+prettier.config.js
+tailwind.config.ts
+tsconfig.json
+
+================================================================
+Files
+================================================================
+
+================
+File: Archive/PricingCTA.tsx
+================
+"use client";
+
+import React from 'react';
+import { Check, Shield, Users } from 'lucide-react';
+
+const plans = [
+  {
+    name: "Basic",
+    price: "$10",
+    period: "monthly",
+    description: "Essential tools for personal retirement planning",
+    features: [
+      "Personal retirement dashboard",
+      "Basic retirement calculator",
+      "Educational resources",
+      "Mobile app access"
+    ],
+    highlighted: false,
+    buttonText: "Get Started"
+  },
+  {
+    name: "Family Plus",
+    price: "$15",
+    period: "monthly",
+    description: "Perfect for managing your family's retirement journey",
+    features: [
+      "Everything in Basic",
+      "Family dashboard with parent accounts",
+      "Advanced planning tools",
+      "Automated monthly reports",
+      "Priority customer support"
+    ],
+    highlighted: true,
+    buttonText: "Start Free Trial",
+    badge: "Most Popular"
+  },
+  {
+    name: "Family Pro",
+    price: "$20",
+    period: "monthly",
+    description: "Complete solution for comprehensive family planning",
+    features: [
+      "Everything in Family Plus",
+      "Multiple customized account views",
+      "Support for parents and dependents",
+      "Estate planning tools",
+      "Dedicated family advisor"
+    ],
+    highlighted: false,
+    buttonText: "Contact Sales"
+  }
+];
+
+const PricingCTA: React.FC = () => {
+  return (
+    <section className="bg-gradient-to-b from-white to-emerald-50 py-20">
+      <div className="container mx-auto px-4">
+        {/* Pricing Grid - Now Horizontal */}
+        <div className="mb-16 flex max-w-7xl flex-col gap-8 px-4 md:flex-row">
+          {plans.map((plan) => (
+            <div 
+              key={plan.name}
+              className={`relative flex flex-1 flex-col rounded-2xl p-8 transition-all duration-300 ${
+                plan.highlighted 
+                  ? 'border-2 border-emerald-500 bg-emerald-50 transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]' 
+                  : 'border border-gray-200 bg-white hover:shadow-lg'
+              }`}
+            >
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="rounded-full bg-emerald-600 px-3 py-1 text-sm text-white">
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
+
+              <div className="text-center">
+                <h3 className="mb-2 text-xl font-bold text-gray-900">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                  <span className="text-gray-600">{plan.period && `/${plan.period}`}</span>
+                </div>
+                <p className="mb-6 text-gray-600">{plan.description}</p>
+              </div>
+              
+              <ul className="mb-8 flex-grow space-y-4">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+                    <span className="text-gray-600">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button 
+                className={`w-full rounded-lg px-6 py-3 transition-all duration-300 ${
+                  plan.highlighted
+                    ? 'bg-emerald-600 text-white transform hover:scale-105 hover:bg-emerald-700'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                }`}
+              >
+                {plan.buttonText}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Additional CTAs */}
+        <div className="mx-auto flex max-w-4xl flex-col gap-8 md:flex-row">
+          <div className="flex-1 rounded-xl bg-white p-6 text-center transition-shadow hover:shadow-lg">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <Users className="h-6 w-6 text-emerald-600" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Schedule a Family Demo</h3>
+            <p className="mb-4 text-gray-600">See how NestWise can help your entire family plan for the future.</p>
+            <button className="font-semibold text-emerald-600 hover:text-emerald-700">
+              Book a Demo →
+            </button>
+          </div>
+
+          <div className="flex-1 rounded-xl bg-white p-6 text-center transition-shadow hover:shadow-lg">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <Shield className="h-6 w-6 text-emerald-600" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Free Resource Center</h3>
+            <p className="mb-4 text-gray-600">Access our library of retirement planning guides and tools.</p>
+            <button className="font-semibold text-emerald-600 hover:text-emerald-700">
+              View Resources →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PricingCTA;
+
+================
+File: Archive/TestimonialCarousel.tsx
+================
+"use client";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+
+interface Testimonial {
+  text: string;
+  author: string;
+  role: string;
+}
+
+const testimonials: Testimonial[] = [
+  {
+    text: "NestWise helped me understand exactly how much support my parents might need. Now I can plan for both our futures with confidence.",
+    author: "Sarah M.",
+    role: "Software Engineer"
+  },
+  {
+    text: "The dashboard makes it so easy to track both my retirement goals and my parents'. It's like having a financial advisor in my pocket.",
+    author: "Michael L.",
+    role: "Marketing Director"
+  },
+  {
+    text: "Setting up retirement accounts for my parents was seamless. NestWise guided me through every step of the process.",
+    author: "David K.",
+    role: "Healthcare Professional"
+  },
+  {
+    text: "Finally found a platform that understands the unique challenges of managing both my retirement and my parents'. The insights are invaluable.",
+    author: "Jennifer R.",
+    role: "Project Manager"
+  },
+  {
+    text: "The ability to see both retirement plans side by side has made family financial discussions so much easier and more productive.",
+    author: "Robert T.",
+    role: "Small Business Owner"
+  },
+  {
+    text: "The educational resources helped me make informed decisions about long-term care planning for my parents while balancing my own goals.",
+    author: "Lisa M.",
+    role: "Education Consultant"
+  },
+  {
+    text: "NestWise's retirement calculator gave us a clear picture of where we stand and what steps we need to take next.",
+    author: "James W.",
+    role: "Sales Director"
+  },
+  {
+    text: "As someone supporting both children and parents, NestWise has been crucial in helping me balance multiple financial responsibilities.",
+    author: "Patricia H.",
+    role: "HR Manager"
+  },
+  {
+    text: "The platform's family sharing features make it easy to collaborate with my siblings on our parents' retirement planning.",
+    author: "Thomas N.",
+    role: "Financial Analyst"
+  },
+  {
+    text: "Being able to model different scenarios has helped us prepare for various retirement possibilities. Extremely useful tool!",
+    author: "Michelle K.",
+    role: "Operations Manager"
+  },
+  {
+    text: "The mobile app keeps me connected to our family's retirement progress wherever I am. Love the instant notifications!",
+    author: "Daniel P.",
+    role: "Technology Consultant"
+  },
+  {
+    text: "NestWise made it simple to consolidate and track multiple retirement accounts. The peace of mind is priceless.",
+    author: "Rachel S.",
+    role: "Healthcare Administrator"
+  },
+  {
+    text: "The platform's recommendations have helped us optimize our retirement strategies and reduce unnecessary fees.",
+    author: "Kevin L.",
+    role: "Research Scientist"
+  }
+];
+
+export const TestimonialCarousel: React.FC = () => {
+  const [current, setCurrent] = useState(0);
+
+  const next = () => setCurrent(prev => (prev + 1) % testimonials.length);
+  const prev = () => setCurrent(prev => (prev - 1 + testimonials.length) % testimonials.length);
+
+  useEffect(() => {
+    const timer = setInterval(next, 5000);
+    return () => clearInterval(timer);
+  }, []); // Remove current from dependencies to avoid unnecessary interval resets
+
+  return (
+    <div className="relative mx-auto w-full max-w-4xl px-4 py-12">
+      <div className="rounded-2xl bg-white p-8 shadow-lg">
+        <div className="relative h-48">
+          {testimonials.map((testimonial, idx) => (
+            <div
+              key={`${testimonial.author}-${idx}`}
+              className={`absolute w-full transition-all duration-500 ${
+                idx === current ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
+              }`}
+            >
+              <p className="mb-4 text-lg italic text-gray-700">{testimonial.text}</p>
+              <div className="font-semibold text-emerald-700">{testimonial.author}</div>
+              <div className="text-sm text-gray-500">{testimonial.role}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-center gap-4">
+          <button
+            onClick={prev}
+            className="rounded-full p-2 text-emerald-700 transition-colors hover:bg-emerald-50"
+            aria-label="Previous testimonial"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button
+            onClick={next}
+            className="rounded-full p-2 text-emerald-700 transition-colors hover:bg-emerald-50"
+            aria-label="Next testimonial"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+================
+File: prisma/schema.prisma
+================
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@localhost/app"
+}
+
+// Prisma doesn't allow having a schema with no models
+// remove this when you add real models
+model ExampleModel {
+  id Int @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  someString String
+}
+
+================
+File: scripts/deploy
+================
+#!/bin/bash
+
+set -e
+cd `dirname $0`
+cd .. # to get out of `scripts` directory
+
+SSH_HOST=root@trynestwise.com
+
+ssh "$SSH_HOST" "systemctl stop nestwise" || true
+rsync -v -a --delete-after --delete-excluded --exclude='node_modules' --exclude='.git' --exclude='dist' --exclude='.next' --exclude='node_modules' --exclude='*.env' --exclude=".turbo" ./ "$SSH_HOST":nestwise/
+scp ./prod.env "$SSH_HOST":nestwise/.env
+ssh "$SSH_HOST" "
+  echo '
+    [Unit]
+    Description=nestwise
+    After=docker.service
+    Requires=docker.service
+
+    [Service]
+    Type=oneshot
+    WorkingDirectory=/root/nestwise
+    Environment=PATH=/root/.local/share/pnpm:$PATH
+    ExecStart=npx codapt start
+    ExecStop=/usr/bin/docker stop nestwise
+    RemainAfterExit=yes
+
+    [Install]
+    WantedBy=multi-user.target
+  ' > /etc/systemd/system/nestwise.service
+  systemctl daemon-reload
+  systemctl enable nestwise
+  systemctl start nestwise
+"
+
+echo 'TEMP: tailing nestwise logs'
+ssh "$SSH_HOST" "docker logs -n 300 -f nestwise"
+
+================
+File: src/app/api/trpc/[trpc]/route.ts
+================
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { NextRequest } from "next/server";
+
+import { env } from "@/env";
+import { appRouter } from "@/server/api/root";
+import { createTRPCContext } from "@/server/api/trpc";
+
+/**
+ * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
+ * handling a HTTP request (e.g. when you make requests from Client Components).
+ */
+const createContext = async (req: NextRequest) => {
+  return createTRPCContext({
+    headers: req.headers,
+  });
+};
+
+const handler = (req: NextRequest) =>
+  fetchRequestHandler({
+    endpoint: "/api/trpc",
+    req,
+    router: appRouter,
+    createContext: () => createContext(req),
+    onError:
+      env.NODE_ENV === "development"
+        ? ({ path, error }) => {
+            console.error(
+              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
+            );
+          }
+        : undefined,
+  });
+
+export { handler as GET, handler as POST };
+
+================
+File: src/app/layout.tsx
+================
+import "@/styles/globals.css";
+
+import { GeistSans } from "geist/font/sans";
+import { Metadata } from "next";
+import { Toaster } from "react-hot-toast";
+
+import { TRPCReactProvider } from "@/trpc/react";
+
+export const metadata: Metadata = {
+  title: "App",
+  description: "",
+  icons: [
+    // place favicon.ico in public folder and uncomment the following line
+    // { rel: "icon", url: "/favicon.ico" }
+  ],
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className={`${GeistSans.variable}`}>
+      <body>
+        <TRPCReactProvider>
+          {children}
+          <Toaster />
+        </TRPCReactProvider>
+      </body>
+    </html>
+  );
+}
+
+================
+File: src/app/page.tsx
+================
+"use client";
+
+import { BarChart2, Shield, Users } from "lucide-react";
+import Image from "next/image";
+import { type NextPage } from "next";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
+
+import EnhancedDashboard from "@/components/EnhancedDashboard";
+
+const Home: NextPage = () => {
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      const animatedElements = document.querySelectorAll('[data-animate="true"]');
+      animatedElements.forEach((element) => {
+        element.classList.remove('opacity-0', 'translate-y-4');
+      });
+    }
+  }, [inView]);
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Bar */}
+      <div className="bg-white px-3 py-3 shadow-sm sm:px-4 sm:py-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Image
+              src="/nestwise-w-text.png"
+              alt="NestWise Logo"
+              width={180}
+              height={60}
+              priority
+              className="w-36 sm:w-44 md:w-[180px]"
+            />
+          </div>
+          <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-xl active:scale-95 sm:px-6 sm:text-base">
+            Contact Us
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      {/* <section className="relative bg-gradient-to-b from-emerald-50 to-white">
+        <div className="container mx-auto px-4 py-16 lg:py-24">
+          <div className="mx-auto max-w-4xl text-center">
+            <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 lg:text-5xl">
+              Balancing Your Parents&apos; Retirement with Your Own? We Can Help.
+            </h1>
+            <p className="mb-8 text-xl leading-relaxed text-gray-600">
+              At <span className="font-semibold text-emerald-700">nestwise</span>, we understand
+              that planning for your future while ensuring your parents&apos; financial stability isn&apos;t easy.
+              Our platform simplifies retirement planning, helping you make informed decisions about
+              savings, healthcare, and long-term care—so you can secure your future and give your
+              parents peace of mind.
+            </p>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <button className="rounded-lg bg-emerald-600 px-8 py-3 text-white transition-colors hover:bg-emerald-700">
+                Start Planning Now
+              </button>
+              <button className="rounded-lg border border-emerald-600 px-8 py-3 text-emerald-600 transition-colors hover:bg-emerald-50">
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+      </section> */}
+
+      {/* Hero Section */}
+<section className="relative bg-gradient-to-b from-emerald-50 to-white">
+  <div className="container mx-auto px-3 py-6 sm:px-4 sm:py-12 lg:py-24">
+    <div className="mx-auto grid grid-cols-1 items-center gap-4 sm:gap-8 lg:grid-cols-2 lg:gap-12">
+      {/* Left Column - Text Content */}
+      <div className="text-center sm:text-left">
+        <h1 className="mb-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:mb-6 lg:text-5xl">
+          Secure your <span className="font-semibold text-emerald-700">Parents&apos; Financial Future</span> with Ease
+        </h1>
+        <p className="mb-4 text-base leading-relaxed text-gray-600 sm:text-lg lg:mb-8 lg:text-xl">
+          At <span className="font-semibold text-emerald-700">nestwise</span>, we understand
+          that planning for your future while ensuring your parents&apos; financial stability isn&apos;t easy.
+          Our platform simplifies retirement planning—so you can secure your future and give your
+          parents peace of mind.
+        </p>
+        <div className="flex w-full justify-center sm:justify-start">
+          <button className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-xl active:scale-95 sm:w-auto sm:px-8 sm:py-3 sm:text-base">
+            Start Planning Now
+          </button>
+        </div>
+      </div>
+
+      {/* Right Column - Image */}
+      <div className="mt-6 flex justify-center sm:mt-8 lg:mt-0 lg:justify-end">
+        <div className="relative h-48 w-full max-w-xs rounded-lg bg-gray-200 sm:h-64 sm:max-w-sm lg:h-96 lg:max-w-lg">
+          <Image
+            src="/parents-w-daughter-cropped.jpeg"
+            alt="Retirement Planning Illustration"
+            fill
+            className="rounded-lg object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority
+            quality={90}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      {/* Features Section */}
+      <section className="bg-white py-8 sm:py-16">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="features-animation">
+            {(() => {
+              const { ref: headingRef, inView: isHeadingVisible } = useInView({
+                threshold: 0.1,
+                triggerOnce: true,
+                rootMargin: "0px 0px -50px 0px"
+              });
+
+              return (
+                <h2
+                  ref={headingRef}
+                  className={`feature-heading mb-6 text-center text-xl font-bold text-gray-900 px-2 sm:mb-12 sm:text-3xl ${
+                    isHeadingVisible ? 'visible' : ''
+                  }`}
+                >
+                  See the Full Picture—Yours and Your Parents&apos;
+                </h2>
+              );
+            })()}
+            <div className="mx-auto grid max-w-5xl gap-3 sm:gap-6 md:grid-cols-3 md:gap-8">
+              {[
+                {
+                  icon: <BarChart2 className="h-8 w-8 text-emerald-600" />,
+                  title: "Track Progress",
+                  description: "Monitor both retirement journeys in one dashboard"
+                },
+                {
+                  icon: <Users className="h-8 w-8 text-emerald-600" />,
+                  title: "Family Support",
+                  description: "Easily manage accounts for yourself and your parents"
+                },
+                {
+                  icon: <Shield className="h-8 w-8 text-emerald-600" />,
+                  title: "Secure Future",
+                  description: "Make confident decisions with expert guidance"
+                }
+              ].map((feature, index) => {
+                const { ref: cardRef, inView: isCardVisible } = useInView({
+                  threshold: 0.15, // Slightly lower threshold for earlier trigger
+                  triggerOnce: true,
+                  rootMargin: "0px 0px -50px 0px" // Trigger slightly before the element is fully in view
+                });
+
+                return (
+                  <div
+                    ref={cardRef}
+                    key={feature.title}
+                    className={`feature-card touch-manipulation rounded-lg bg-white p-3 text-center shadow-sm transition-all sm:p-6 ${
+                      isCardVisible ? 'visible' : ''
+                    }`}
+                  >
+                    <div className="mx-auto mb-2.5 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 sm:mb-4 sm:h-16 sm:w-16">
+                      {feature.icon}
+                    </div>
+                    <h3 className="mb-1.5 text-base font-semibold sm:mb-2 sm:text-xl">{feature.title}</h3>
+                    <p className="text-xs leading-relaxed text-gray-600 sm:text-base">{feature.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dashboard Preview Section */}
+      {(() => {
+        const { ref: dashboardRef, inView: isDashboardVisible } = useInView({
+          threshold: 0.1,
+          triggerOnce: true,
+          rootMargin: "0px 0px -50px 0px"
+        });
+
+        return (
+          <section
+            ref={dashboardRef}
+            className={`dashboard-section bg-gray-50 py-16 ${
+              isDashboardVisible ? 'visible' : ''
+            }`}
+          >
+            <div className="container mx-auto px-4">
+              <h2 className="mb-12 text-center text-3xl font-bold text-gray-900">
+                Your Financial Command Center
+              </h2>
+              <EnhancedDashboard />
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* Final CTA Section */}
+      {(() => {
+        const { ref: ctaRef, inView: isCtaVisible } = useInView({
+          threshold: 0.1,
+          triggerOnce: true,
+          rootMargin: "0px 0px -50px 0px"
+        });
+
+        return (
+          <section
+            ref={ctaRef}
+            className={`dashboard-section bg-emerald-700 py-8 text-white sm:py-16 ${
+              isCtaVisible ? 'visible' : ''
+            }`}
+          >
+            <div className="container mx-auto px-3 text-center sm:px-4">
+              <h2 className="mb-4 text-xl font-bold sm:mb-6 sm:text-3xl">
+                Retirement Planning for Two Generations Starts Here
+              </h2>
+              <div className="flex justify-center px-2 sm:px-4">
+                <button className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-emerald-700 shadow-md transition-all duration-200 hover:bg-emerald-50 active:scale-95 sm:w-auto sm:px-8 sm:py-3 sm:text-base">
+                  Start Now
+                </button>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* Footer */}
+      <footer className="footer-section bg-white px-3 py-3 shadow-sm sm:px-4 sm:py-4">
+        <div className="container mx-auto flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+          <div className="flex items-center">
+            <Image
+              src="/nestwise-w-text.png"
+              alt="NestWise Logo"
+              width={120}
+              height={40}
+              priority
+              className="w-24 sm:w-28 md:w-[120px]"
+            />
+          </div>
+          <span className="text-xs text-gray-600 sm:text-sm">
+            &copy; 2025 nestwise. All rights reserved.
+          </span>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Home;
+
+================
+File: src/components/DashboardMockup.tsx
+================
+"use client";
+
+/**
+ * @deprecated This component has been replaced by EnhancedDashboard.
+ * Please use EnhancedDashboard instead.
+ */
+
+import { BarChart2 } from "lucide-react";
+
+export const DashboardMockup: React.FC = () => (
+  <div className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow-lg">
+    <div className="mb-6 flex items-center justify-between">
+      <h3 className="text-lg font-semibold text-gray-800">Financial Dashboard</h3>
+      <div className="flex gap-2">
+        <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+          Your Retirement
+        </span>
+        <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+          Parents&apos; Retirement
+        </span>
+      </div>
+    </div>
+    <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="rounded-xl bg-emerald-50 p-4">
+        <div className="mb-2 text-sm text-gray-600">Your Retirement Progress</div>
+        <div className="text-2xl font-bold text-emerald-700">68%</div>
+        <div className="mt-2 h-2.5 w-full rounded-full bg-gray-200">
+          <div className="h-2.5 w-[68%] rounded-full bg-emerald-600 transition-all duration-500"></div>
+        </div>
+      </div>
+      <div className="rounded-xl bg-emerald-50 p-4">
+        <div className="mb-2 text-sm text-gray-600">Parents&apos; Retirement Progress</div>
+        <div className="text-2xl font-bold text-emerald-700">45%</div>
+        <div className="mt-2 h-2.5 w-full rounded-full bg-gray-200">
+          <div className="h-2.5 w-[45%] rounded-full bg-emerald-600 transition-all duration-500"></div>
+        </div>
+      </div>
+    </div>
+    <div className="mb-6 flex h-48 items-center justify-center rounded-xl bg-gray-50">
+      <BarChart2 className="h-32 w-32 text-emerald-200" />
+    </div>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="rounded-xl bg-emerald-50 p-3 text-center">
+        <div className="text-sm text-gray-600">Monthly Savings</div>
+        <div className="text-lg font-semibold text-emerald-700">$2,450</div>
+      </div>
+      <div className="rounded-xl bg-emerald-50 p-3 text-center">
+        <div className="text-sm text-gray-600">Total Assets</div>
+        <div className="text-lg font-semibold text-emerald-700">$425,800</div>
+      </div>
+      <div className="rounded-xl bg-emerald-50 p-3 text-center">
+        <div className="text-sm text-gray-600">Projected Goal</div>
+        <div className="text-lg font-semibold text-emerald-700">$1.2M</div>
+      </div>
+    </div>
+  </div>
+);
+
+================
+File: src/components/EnhancedDashboard.tsx
+================
+"use client";
+
+import React, { useState } from 'react';
+import { LineChart, PieChart } from 'lucide-react';
+
+interface DashboardData {
+  progress: number;
+  monthlySavings: number;
+  totalAssets: number;
+  projectedGoal: string;
+}
+
+interface DashboardDataMap {
+  personal: DashboardData;
+  parents: DashboardData;
+}
+
+const EnhancedDashboard: React.FC = () => {
+  const [activeView, setActiveView] = useState<'personal' | 'parents'>('personal');
+  const [scrollPosition, setScrollPosition] = useState<number>(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setScrollPosition(e.currentTarget.scrollTop);
+  };
+
+  const dashboardData: DashboardDataMap = {
+    personal: {
+      progress: 68,
+      monthlySavings: 2450,
+      totalAssets: 425800,
+      projectedGoal: '1.2M',
+    },
+    parents: {
+      progress: 45,
+      monthlySavings: 1850,
+      totalAssets: 385000,
+      projectedGoal: '950K',
+    }
+  };
+
+  const activeData = dashboardData[activeView];
+
+  return (
+    <div className="mx-auto max-w-4xl rounded-2xl bg-white p-3 shadow-lg sm:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className="text-base font-semibold text-gray-800 sm:text-lg">Financial Dashboard</h3>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveView('personal')}
+            className={`inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full px-3 py-2 text-sm font-medium transition-colors sm:min-h-[36px] sm:flex-initial sm:py-1 ${
+              activeView === 'personal'
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'bg-gray-100 text-gray-600 active:bg-emerald-50 sm:hover:bg-emerald-50'
+            }`}
+          >
+            Your Retirement
+          </button>
+          <button
+            onClick={() => setActiveView('parents')}
+            className={`inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full px-3 py-2 text-sm font-medium transition-colors sm:min-h-[36px] sm:flex-initial sm:py-1 ${
+              activeView === 'parents'
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'bg-gray-100 text-gray-600 active:bg-emerald-50 sm:hover:bg-emerald-50'
+            }`}
+          >
+            Parents&apos; Retirement
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:gap-6 md:grid-cols-2">
+        <div className="rounded-xl bg-emerald-50 p-3 sm:p-4">
+          <div className="text-sm text-gray-600 mb-2">
+            {activeView === 'personal' ? 'Your' : "Parents'"} Retirement Progress
+          </div>
+          <div className="text-2xl font-bold text-emerald-700">{activeData.progress}%</div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+            <div
+              className="bg-emerald-600 h-2.5 rounded-full transition-all duration-500"
+              style={{ width: `${activeData.progress}%` }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-emerald-50 p-3 sm:p-4">
+          <div className="mb-2 text-sm text-gray-600">Annual Goal Progress</div>
+          <div className="text-2xl font-bold text-emerald-700">82%</div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+            <div
+              className="bg-emerald-600 h-2.5 rounded-full transition-all duration-500"
+              style={{ width: '82%' }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-4 h-48 overflow-y-auto rounded-xl bg-gray-50 sm:mb-6" onScroll={handleScroll}>
+        <div className="p-3 sm:p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-semibold text-gray-700">Investment Allocation</h4>
+            <div className="flex gap-2">
+              <button className="min-h-[44px] min-w-[44px] rounded-lg p-2 active:bg-gray-100 sm:min-h-[36px] sm:min-w-[36px] sm:hover:bg-gray-100">
+                <LineChart className="h-5 w-5 text-gray-600" />
+              </button>
+              <button className="min-h-[44px] min-w-[44px] rounded-lg p-2 active:bg-gray-100 sm:min-h-[36px] sm:min-w-[36px] sm:hover:bg-gray-100">
+                <PieChart className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {['Stocks', 'Bonds', 'Real Estate', 'Cash', 'Other'].map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between">
+                <span className="text-gray-600">{item}</span>
+                <div className="w-2/3">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.random() * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="rounded-xl bg-emerald-50 p-3 text-center">
+          <div className="text-sm text-gray-600">Monthly Savings</div>
+          <div className="text-lg font-semibold text-emerald-700">
+            ${activeData.monthlySavings.toLocaleString()}
+          </div>
+        </div>
+        <div className="p-3 bg-emerald-50 rounded-xl text-center">
+          <div className="text-sm text-gray-600">Total Assets</div>
+          <div className="text-lg font-semibold text-emerald-700">
+            ${activeData.totalAssets.toLocaleString()}
+          </div>
+        </div>
+        <div className="p-3 bg-emerald-50 rounded-xl text-center">
+          <div className="text-sm text-gray-600">Projected Goal</div>
+          <div className="text-lg font-semibold text-emerald-700">
+            ${activeData.projectedGoal}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedDashboard;
+
+================
+File: src/components/PricingCTA.tsx
+================
+"use client";
+
+import React from 'react';
+import { Check, Shield, Users } from 'lucide-react';
+
+const plans = [
+  {
+    name: "Basic",
+    price: "$10",
+    period: "monthly",
+    description: "Essential tools for personal retirement planning",
+    features: [
+      "Personal retirement dashboard",
+      "Basic retirement calculator",
+      "Educational resources",
+      "Mobile app access"
+    ],
+    highlighted: false,
+    buttonText: "Get Started"
+  },
+  {
+    name: "Family Plus",
+    price: "$15",
+    period: "monthly",
+    description: "Perfect for managing your family's retirement journey",
+    features: [
+      "Everything in Basic",
+      "Family dashboard with parent accounts",
+      "Advanced planning tools",
+      "Automated monthly reports",
+      "Priority customer support"
+    ],
+    highlighted: true,
+    buttonText: "Start Free Trial",
+    badge: "Most Popular"
+  },
+  {
+    name: "Family Pro",
+    price: "$20",
+    period: "monthly",
+    description: "Complete solution for comprehensive family planning",
+    features: [
+      "Everything in Family Plus",
+      "Multiple customized account views",
+      "Support for parents and dependents",
+      "Estate planning tools",
+      "Dedicated family advisor"
+    ],
+    highlighted: false,
+    buttonText: "Contact Sales"
+  }
+];
+
+const PricingCTA: React.FC = () => {
+  return (
+    <section className="bg-gradient-to-b from-white to-emerald-50 py-20">
+      <div className="container mx-auto px-4">
+        {/* Pricing Grid - Now Horizontal */}
+        <div className="mb-16 flex max-w-7xl flex-col gap-8 px-4 md:flex-row">
+          {plans.map((plan) => (
+            <div 
+              key={plan.name}
+              className={`relative flex flex-1 flex-col rounded-2xl p-8 transition-all duration-300 ${
+                plan.highlighted 
+                  ? 'border-2 border-emerald-500 bg-emerald-50 transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)]' 
+                  : 'border border-gray-200 bg-white hover:shadow-lg'
+              }`}
+            >
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="rounded-full bg-emerald-600 px-3 py-1 text-sm text-white">
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
+
+              <div className="text-center">
+                <h3 className="mb-2 text-xl font-bold text-gray-900">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                  <span className="text-gray-600">{plan.period && `/${plan.period}`}</span>
+                </div>
+                <p className="mb-6 text-gray-600">{plan.description}</p>
+              </div>
+              
+              <ul className="mb-8 flex-grow space-y-4">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+                    <span className="text-gray-600">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button 
+                className={`w-full rounded-lg px-6 py-3 transition-all duration-300 ${
+                  plan.highlighted
+                    ? 'bg-emerald-600 text-white transform hover:scale-105 hover:bg-emerald-700'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                }`}
+              >
+                {plan.buttonText}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Additional CTAs */}
+        <div className="mx-auto flex max-w-4xl flex-col gap-8 md:flex-row">
+          <div className="flex-1 rounded-xl bg-white p-6 text-center transition-shadow hover:shadow-lg">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <Users className="h-6 w-6 text-emerald-600" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Schedule a Family Demo</h3>
+            <p className="mb-4 text-gray-600">See how NestWise can help your entire family plan for the future.</p>
+            <button className="font-semibold text-emerald-600 hover:text-emerald-700">
+              Book a Demo →
+            </button>
+          </div>
+
+          <div className="flex-1 rounded-xl bg-white p-6 text-center transition-shadow hover:shadow-lg">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <Shield className="h-6 w-6 text-emerald-600" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Free Resource Center</h3>
+            <p className="mb-4 text-gray-600">Access our library of retirement planning guides and tools.</p>
+            <button className="font-semibold text-emerald-600 hover:text-emerald-700">
+              View Resources →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PricingCTA;
+
+================
+File: src/components/TestimonialCarousel.tsx
+================
+"use client";
+
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+
+interface Testimonial {
+  text: string;
+  author: string;
+  role: string;
+}
+
+const testimonials: Testimonial[] = [
+  {
+    text: "NestWise helped me understand exactly how much support my parents might need. Now I can plan for both our futures with confidence.",
+    author: "Sarah M.",
+    role: "Software Engineer"
+  },
+  {
+    text: "The dashboard makes it so easy to track both my retirement goals and my parents'. It's like having a financial advisor in my pocket.",
+    author: "Michael L.",
+    role: "Marketing Director"
+  },
+  {
+    text: "Setting up retirement accounts for my parents was seamless. NestWise guided me through every step of the process.",
+    author: "David K.",
+    role: "Healthcare Professional"
+  },
+  {
+    text: "Finally found a platform that understands the unique challenges of managing both my retirement and my parents'. The insights are invaluable.",
+    author: "Jennifer R.",
+    role: "Project Manager"
+  },
+  {
+    text: "The ability to see both retirement plans side by side has made family financial discussions so much easier and more productive.",
+    author: "Robert T.",
+    role: "Small Business Owner"
+  },
+  {
+    text: "The educational resources helped me make informed decisions about long-term care planning for my parents while balancing my own goals.",
+    author: "Lisa M.",
+    role: "Education Consultant"
+  },
+  {
+    text: "NestWise's retirement calculator gave us a clear picture of where we stand and what steps we need to take next.",
+    author: "James W.",
+    role: "Sales Director"
+  },
+  {
+    text: "As someone supporting both children and parents, NestWise has been crucial in helping me balance multiple financial responsibilities.",
+    author: "Patricia H.",
+    role: "HR Manager"
+  },
+  {
+    text: "The platform's family sharing features make it easy to collaborate with my siblings on our parents' retirement planning.",
+    author: "Thomas N.",
+    role: "Financial Analyst"
+  },
+  {
+    text: "Being able to model different scenarios has helped us prepare for various retirement possibilities. Extremely useful tool!",
+    author: "Michelle K.",
+    role: "Operations Manager"
+  },
+  {
+    text: "The mobile app keeps me connected to our family's retirement progress wherever I am. Love the instant notifications!",
+    author: "Daniel P.",
+    role: "Technology Consultant"
+  },
+  {
+    text: "NestWise made it simple to consolidate and track multiple retirement accounts. The peace of mind is priceless.",
+    author: "Rachel S.",
+    role: "Healthcare Administrator"
+  },
+  {
+    text: "The platform's recommendations have helped us optimize our retirement strategies and reduce unnecessary fees.",
+    author: "Kevin L.",
+    role: "Research Scientist"
+  }
+];
+
+export const TestimonialCarousel: React.FC = () => {
+  const [current, setCurrent] = useState(0);
+
+  const next = () => setCurrent(prev => (prev + 1) % testimonials.length);
+  const prev = () => setCurrent(prev => (prev - 1 + testimonials.length) % testimonials.length);
+
+  useEffect(() => {
+    const timer = setInterval(next, 5000);
+    return () => clearInterval(timer);
+  }, []); // Remove current from dependencies to avoid unnecessary interval resets
+
+  return (
+    <div className="relative mx-auto w-full max-w-4xl px-4 py-12">
+      <div className="rounded-2xl bg-white p-8 shadow-lg">
+        <div className="relative h-48">
+          {testimonials.map((testimonial, idx) => (
+            <div
+              key={`${testimonial.author}-${idx}`}
+              className={`absolute w-full transition-all duration-500 ${
+                idx === current ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
+              }`}
+            >
+              <p className="mb-4 text-lg italic text-gray-700">{testimonial.text}</p>
+              <div className="font-semibold text-emerald-700">{testimonial.author}</div>
+              <div className="text-sm text-gray-500">{testimonial.role}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-center gap-4">
+          <button
+            onClick={prev}
+            className="rounded-full p-2 text-emerald-700 transition-colors hover:bg-emerald-50"
+            aria-label="Previous testimonial"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button
+            onClick={next}
+            className="rounded-full p-2 text-emerald-700 transition-colors hover:bg-emerald-50"
+            aria-label="Next testimonial"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+================
+File: src/server/api/root.ts
+================
+import {
+  createCallerFactory,
+  createTRPCRouter,
+  procedure,
+} from "@/server/api/trpc";
+
+/**
+ * This is the primary router for your server.
+ *
+ * Procedures from api/procedures should be added here.
+ */
+export const appRouter = createTRPCRouter({
+  // add procedures and subrouters here
+  // when we add a real procedure, remove this placeholder
+  placeholderProcedure: procedure.query(() => {
+    return "placeholder";
+  }),
+});
+
+// export type definition of API
+export type AppRouter = typeof appRouter;
+
+/**
+ * Create a server-side caller for the tRPC API.
+ * @example
+ * const trpc = createCaller(createContext);
+ * const res = await trpc.post.all();
+ *       ^? Post[]
+ */
+export const createCaller = createCallerFactory(appRouter);
+
+================
+File: src/server/api/trpc.ts
+================
+/**
+ * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
+ * 1. You want to modify request context (see Part 1).
+ * 2. You want to create a new middleware or type of procedure (see Part 3).
+ *
+ * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
+ * need to use are documented accordingly near the end.
+ */
+import { initTRPC } from "@trpc/server";
+import superjson from "superjson";
+import { ZodError } from "zod";
+
+/**
+ * 1. CONTEXT
+ *
+ * This section defines the "contexts" that are available in the backend API.
+ *
+ * These allow you to access things when processing a request, like the database, the session, etc.
+ *
+ * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
+ * wrap this and provides the required context.
+ *
+ * @see https://trpc.io/docs/server/context
+ */
+export const createTRPCContext = async (opts: { headers: Headers }) => {
+  return {
+    ...opts,
+  };
+};
+
+/**
+ * 2. INITIALIZATION
+ *
+ * This is where the tRPC API is initialized, connecting the context and transformer. We also parse
+ * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
+ * errors on the backend.
+ */
+const t = initTRPC.context<typeof createTRPCContext>().create({
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
+    };
+  },
+});
+
+/**
+ * Create a server-side caller.
+ *
+ * @see https://trpc.io/docs/server/server-side-calls
+ */
+export const createCallerFactory = t.createCallerFactory;
+
+/**
+ * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
+ *
+ * These are the pieces you use to build your tRPC API. You should import these a lot in the
+ * "/src/server/api/routers" directory.
+ */
+
+/**
+ * This is how you create new routers and sub-routers in your tRPC API.
+ *
+ * @see https://trpc.io/docs/router
+ */
+export const createTRPCRouter = t.router;
+
+export const procedure = t.procedure;
+
+================
+File: src/server/db.ts
+================
+import { PrismaClient } from "@prisma/client";
+
+import { env } from "@/env";
+
+const createPrismaClient = () =>
+  new PrismaClient({
+    log:
+      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+  });
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<typeof createPrismaClient> | undefined;
+};
+
+export const db = globalForPrisma.prisma ?? createPrismaClient();
+
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+
+================
+File: src/styles/globals.css
+================
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Feature heading animation */
+.feature-heading {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.feature-heading.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Optimize animations for mobile */
+@media (max-width: 640px) {
+  .feature-heading {
+    transform: translateY(10px);
+    transition-duration: 0.4s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-heading {
+    transform: none;
+    transition: opacity 0.1s ease;
+  }
+}
+
+/* Dashboard animation classes */
+.dashboard-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 640px) {
+  .dashboard-section {
+    transform: translateY(15px);
+    transition-duration: 0.4s;
+  }
+}
+
+.dashboard-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feature-card {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feature-card.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Optimize animations for mobile */
+@media (max-width: 640px) {
+  .feature-card {
+    transform: translateY(15px) scale(0.98);
+    transition-duration: 0.4s;
+  }
+}
+
+/* Apply progressive delays based on card position */
+.feature-card:nth-child(1).visible {
+  transition-delay: 50ms;
+}
+
+.feature-card:nth-child(2).visible {
+  transition-delay: 150ms;
+}
+
+.feature-card:nth-child(3).visible {
+  transition-delay: 250ms;
+}
+
+/* Touch-friendly hover effects with performance optimizations */
+@media (hover: hover) {
+  .feature-card.visible:hover {
+    transform: translateY(-3px);
+    transition-duration: 0.3s;
+    will-change: transform;
+  }
+}
+
+@media (hover: none) {
+  .feature-card:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+    will-change: transform;
+  }
+}
+
+/* Optimize paint performance for mobile devices */
+@media (max-width: 640px) {
+  .feature-card,
+  .feature-heading,
+  .dashboard-section {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Footer styling */
+.footer-section {
+  position: relative;
+  width: 100%;
+  background-color: white;
+  transition: transform 0.3s ease;
+  margin-top: auto;
+  border-top: 1px solid #f3f4f6;
+  z-index: 10;
+}
+
+/* Subtle hover effect */
+@media (hover: hover) {
+  .footer-section:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .features-animation *,
+  .feature-card,
+  .footer-section {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+}
+
+================
+File: src/trpc/query-client.ts
+================
+import {
+  defaultShouldDehydrateQuery,
+  QueryClient,
+} from "@tanstack/react-query";
+import SuperJSON from "superjson";
+
+export const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        // With SSR, we usually want to set some default staleTime
+        // above 0 to avoid refetching immediately on the client
+        staleTime: 30 * 1000,
+      },
+      dehydrate: {
+        serializeData: SuperJSON.serialize,
+        shouldDehydrateQuery: (query) =>
+          defaultShouldDehydrateQuery(query) ||
+          query.state.status === "pending",
+      },
+      hydrate: {
+        deserializeData: SuperJSON.deserialize,
+      },
+    },
+  });
+
+================
+File: src/trpc/react.tsx
+================
+"use client";
+
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import {
+  loggerLink,
+  splitLink,
+  unstable_httpBatchStreamLink,
+  unstable_httpSubscriptionLink,
+} from "@trpc/client";
+import { createTRPCReact } from "@trpc/react-query";
+import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { useState } from "react";
+import SuperJSON from "superjson";
+
+import { AppRouter } from "@/server/api/root";
+import { createQueryClient } from "./query-client";
+
+let clientQueryClientSingleton: QueryClient | undefined = undefined;
+const getQueryClient = () => {
+  if (typeof window === "undefined") {
+    // Server: always make a new query client
+    return createQueryClient();
+  }
+  // Browser: use singleton pattern to keep the same query client
+  return (clientQueryClientSingleton ??= createQueryClient());
+};
+
+export const api = createTRPCReact<AppRouter>({
+  overrides: {
+    useMutation: {
+      /**
+       * This function is called whenever a `.useMutation` succeeds
+       **/
+      async onSuccess(opts) {
+        /**
+         * @note that order here matters:
+         * The order here allows route changes in `onSuccess` without
+         * having a flash of content change whilst redirecting.
+         **/
+        // Calls the `onSuccess` defined in the `useQuery()`-options:
+        await opts.originalFn();
+        // Invalidate all queries in the react-query cache:
+        await opts.queryClient.invalidateQueries();
+      },
+    },
+  },
+});
+
+/**
+ * Inference helper for inputs.
+ *
+ * @example type HelloInput = RouterInputs['example']['hello']
+ */
+export type RouterInputs = inferRouterInputs<AppRouter>;
+
+/**
+ * Inference helper for outputs.
+ *
+ * @example type HelloOutput = RouterOutputs['example']['hello']
+ */
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
+
+export function TRPCReactProvider(props: { children: React.ReactNode }) {
+  const queryClient = getQueryClient();
+
+  const [trpcClient] = useState(() =>
+    api.createClient({
+      links: [
+        loggerLink({
+          enabled: (op) =>
+            process.env.NODE_ENV === "development" ||
+            (op.direction === "down" && op.result instanceof Error),
+        }),
+        splitLink({
+          condition: (op) => op.type === "subscription",
+          false: unstable_httpBatchStreamLink({
+            transformer: SuperJSON,
+            url: getBaseUrl() + "/api/trpc",
+            headers: () => {
+              const headers = new Headers();
+              headers.set("x-trpc-source", "nextjs-react");
+              return headers;
+            },
+          }),
+          true: unstable_httpSubscriptionLink({
+            transformer: SuperJSON,
+            url: getBaseUrl() + "/api/trpc",
+          }),
+        }),
+      ],
+    }),
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <api.Provider client={trpcClient} queryClient={queryClient}>
+        {props.children}
+      </api.Provider>
+    </QueryClientProvider>
+  );
+}
+
+function getBaseUrl() {
+  if (typeof window !== "undefined") return window.location.origin;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+
+================
+File: src/trpc/server.ts
+================
+import "server-only";
+
+import { createHydrationHelpers } from "@trpc/react-query/rsc";
+import { headers } from "next/headers";
+import { cache } from "react";
+
+import { createCaller, AppRouter } from "@/server/api/root";
+import { createTRPCContext } from "@/server/api/trpc";
+import { createQueryClient } from "./query-client";
+
+/**
+ * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
+ * handling a tRPC call from a React Server Component.
+ */
+const createContext = cache(() => {
+  const heads = new Headers(headers());
+  heads.set("x-trpc-source", "rsc");
+
+  return createTRPCContext({
+    headers: heads,
+  });
+});
+
+const getQueryClient = cache(createQueryClient);
+const caller = createCaller(createContext);
+
+export const { trpc: api, HydrateClient } = createHydrationHelpers<AppRouter>(
+  caller,
+  getQueryClient,
+);
+
+================
+File: src/env.js
+================
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  /**
+   * Specify your server-side environment variables schema here. This way you can ensure the app
+   * isn't built with invalid env vars.
+   */
+  server: {
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
+  },
+
+  /**
+   * Specify your client-side environment variables schema here. This way you can ensure the app
+   * isn't built with invalid env vars. To expose them to the client, prefix them with
+   * `NEXT_PUBLIC_`.
+   */
+  client: {
+    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+  },
+
+  /**
+   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
+   * middlewares) or client-side so we need to destruct manually.
+   */
+  runtimeEnv: {
+    NODE_ENV: process.env.NODE_ENV,
+    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  },
+  /**
+   * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
+   * useful for Docker builds.
+   */
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  /**
+   * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
+   * `SOME_VAR=''` will throw an error.
+   */
+  emptyStringAsUndefined: true,
+});
+
+================
+File: .gitignore
+================
+.env
+prod.env
+
+================
+File: next-env.d.ts
+================
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/basic-features/typescript for more information.
+
+================
+File: next.config.js
+================
+/**
+ * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
+ * for Docker builds.
+ */
+await import("./src/env.js");
+
+/** @type {import("next").NextConfig} */
+const config = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
+
+export default config;
+
+================
+File: package.json
+================
+{
+  "name": "alejandro-new-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "db:generate": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "dev": "next dev",
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . -c .eslintrc.cjs --max-warnings 0",
+    "lint:fix": "eslint . --fix -c .eslintrc.fix.cjs --max-warnings 0",
+    "format": "prettier --write .",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.1.5",
+    "@headlessui/react": "^2.1.3",
+    "@hookform/resolvers": "^3.9.0",
+    "@prisma/client": "^5.14.0",
+    "@t3-oss/env-nextjs": "^0.10.1",
+    "@tanstack/react-query": "^5.50.0",
+    "@trpc/client": "^11.0.0-rc.730",
+    "@trpc/react-query": "^11.0.0-rc.730",
+    "@trpc/server": "^11.0.0-rc.730",
+    "ai": "^4.1.11",
+    "bcrypt": "^5.1.1",
+    "cookie": "^1.0.2",
+    "dotenv": "^16.4.5",
+    "geist": "^1.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "next": "^14.2.4",
+    "nodemon": "^3.1.4",
+    "pm2": "^5.4.2",
+    "react": "^18.3.1",
+    "react-cookie": "^7.2.0",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.0",
+    "react-hot-toast": "^2.4.1",
+    "react-intersection-observer": "^9.13.1",
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.1",
+    "tsx": "^4.19.0",
+    "zod": "^3.23.3",
+    "lucide-react": "^0.475.0"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.7.2",
+    "@tanstack/eslint-plugin-query": "^5.59.7",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie": "^0.6.0",
+    "@types/eslint": "^8.56.10",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.4",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-server-components": "^1.2.0",
+    "eslint-plugin-tailwindcss": "^3.17.4",
+    "eslint-plugin-unused-imports": "^4.1.3",
+    "postcss": "^8.4.39",
+    "prettier": "^3.3.2",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "prisma": "^5.14.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.5.3"
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.37.0"
+  },
+  "packageManager": "npm@10.8.2"
+}
+
+================
+File: postcss.config.cjs
+================
+const config = {
+  plugins: {
+    tailwindcss: {},
+  },
+};
+
+module.exports = config;
+
+================
+File: prettier.config.js
+================
+/** @type {import('prettier').Config & import('prettier-plugin-tailwindcss').PluginOptions} */
+const config = {
+  plugins: ["prettier-plugin-tailwindcss"],
+  semi: true,
+  singleQuote: false,
+  tabWidth: 2,
+  trailingComma: "all",
+};
+
+export default config;
+
+================
+File: tailwind.config.ts
+================
+import { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
+
+export default {
+  content: ["./src/**/*.tsx"],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", ...fontFamily.sans],
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;
+
+================
+File: tsconfig.json
+================
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "checkJs": true,
+
+    /* Bundled projects */
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    "plugins": [{ "name": "next" }],
+    "incremental": true,
+
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    ".eslintrc.cjs",
+    ".eslintrc.fix.cjs",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
+
+
+
+================================================================
+End of Codebase
+================================================================
