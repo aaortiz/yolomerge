@@ -185,53 +185,34 @@ async def server_connections_context():
     connections = ServerConnections()
 
     try:
-        # Get absolute path to current script directory
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        logger.info(f"Middleware script directory: {script_dir}")
+        # Use fully qualified paths
+        code_analyzer_path = "/Users/jsc/saichandu_githhub/yolomerge/orchestrator_mcp/code_analyzer_server.py"
+        security_checker_path = "/Users/jsc/saichandu_githhub/yolomerge/orchestrator_mcp/security_checker_server.py"
+        python_path = "/Users/jsc/saichandu_githhub/yolomerge/.venv/bin/python3"
+        
+        logger.info(f"Starting code analyzer at: {code_analyzer_path}")
+        connections.register_server(
+            "code_analyzer",
+            python_path,
+            [code_analyzer_path]
+        )
+        
+        logger.info(f"Starting security checker at: {security_checker_path}")
+        connections.register_server(
+            "security_checker", 
+            python_path,
+            [security_checker_path]
+        )
 
-        # Construct full paths robustly
-        code_analyzer_path = os.path.join(script_dir, "code_analyzer_server.py")
-        security_checker_path = os.path.join(script_dir, "security_checker_server.py")
-
-        # Log the paths being used
-        logger.info(f"Code analyzer path: {code_analyzer_path}")
-        logger.info(f"Security checker path: {security_checker_path}")
-
-        # Check if subordinate scripts exist before registering
-        if not os.path.exists(code_analyzer_path):
-            logger.error(f"Code analyzer script not found at: {code_analyzer_path}")
-        else:
-             connections.register_server(
-                 "code_analyzer",
-                 "python3", # Ensure this is correct for your system
-                 [code_analyzer_path]
-             )
-
-        if not os.path.exists(security_checker_path):
-            logger.error(f"Security checker script not found at: {security_checker_path}")
-        else:
-            connections.register_server(
-                "security_checker",
-                "python3", # Ensure this is correct for your system
-                [security_checker_path]
-            )
-
-        # Connect to all registered servers
+        # Connect with proper timeout handling
         await connections.connect_all()
-
-        # Yield the connections object to the middleware application
         yield connections
-
     except Exception as e:
-        logger.error(f"Critical error during server_connections_context setup: {e}")
-        logger.debug(traceback.format_exc())
-        # Depending on desired behavior, you might re-raise or just yield an empty/failed state
-        # For now, we let it proceed to finally
+        logger.error(f"Error in server connections: {e}")
+        yield connections  # Still yield, but connections might be incomplete
     finally:
-        logger.info("Exiting server_connections_context, closing connections...")
         await connections.close_all()
-        logger.info("Server connections context finished.")
-
+        
 # Create the middleware FastMCP server
 @asynccontextmanager
 async def middleware_lifespan(server: FastMCP):
@@ -305,31 +286,40 @@ async def analyze_files(file_paths: List[str], ctx: Context) -> str:
     security_results = "Security checker server not available or connection failed during startup."
 
     # --- Call Code Analyzer ---
+# Inside analyze_files tool in mcp_middleware.py
+
+# --- Call Code Analyzer ---
     code_analyzer = connections.get_connection("code_analyzer")
-    if code_analyzer and code_analyzer.session: # Check both connection object and active session
+    if code_analyzer and code_analyzer.session:
+        logger.debug(f"Code analyzer session appears active (Session ID: {code_analyzer.session if code_analyzer.session else 'N/A'}). Preparing to call tool.") # Added check
         try:
             tool_name = "analyze_code"
             tool_args = {"file_paths": valid_paths}
             logger.info(f"Sending files to code analyzer ({code_analyzer.name}) - Tool: {tool_name}, Args: {tool_args}")
-            ctx.info("Sending files to code analyzer...") # Inform client
+            ctx.info("Sending files to code analyzer...")
 
+            logger.debug(f"--- ABOUT TO AWAIT call_tool('{tool_name}')... ---") # Log before await
             code_analysis = await code_analyzer.session.call_tool(tool_name, tool_args)
+            logger.debug(f"--- RETURNED FROM await call_tool('{tool_name}') ---") # Log after await
 
             # Safely extract text content
             text_parts = [content.text for content in code_analysis.content if hasattr(content, "text")]
-            code_results = "\n".join(text_parts).strip() # Strip potential whitespace
-            if not code_results: # Handle case where tool returns empty content
-                 code_results = "[Code analyzer returned no text content]"
+            code_results = "\n".join(text_parts).strip()
+            if not code_results:
+                code_results = "[Code analyzer returned no text content]"
             logger.info("Code analysis completed successfully.")
+            logger.debug(f"Code analysis raw result text: '{code_results}'") # Log result
 
         except Exception as e:
+            # Log the specific exception during the call_tool attempt
             error_msg = f"Error during code analysis call: {str(e)}"
             logger.error(error_msg)
-            logger.debug(traceback.format_exc())
+            # Log the full traceback for this specific error
+            logger.error(f"Traceback for code analysis call error:\n{traceback.format_exc()}")
             code_results = f"ERROR calling code analyzer: {error_msg}"
-            ctx.error(f"Failed to get results from code analyzer: {e}") # Inform client of error
+            ctx.error(f"Failed to get results from code analyzer: {e}")
     elif code_analyzer:
-         logger.warning("Code analyzer connection exists, but session is not active (likely failed during startup).")
+        logger.warning("Code analyzer connection exists, but session is not active (likely failed during startup).")
     else:
         logger.warning("Code analyzer server was not registered or found.")
 
