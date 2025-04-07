@@ -1,4 +1,5 @@
 import pydantic_ai as pai
+import logging
 from httpx import AsyncClient
 from mcp.server import fastmcp as fm
 from pydantic_ai.models.gemini import GeminiModel
@@ -10,7 +11,8 @@ from prd_mcp.config import get_config
 mcp = fm.FastMCP(name="prd_mcp")
 
 
-config = get_config()
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 custom_http_client = AsyncClient(timeout=100000)
 model = GeminiModel(
@@ -32,7 +34,11 @@ agent = pai.Agent(
 @mcp.tool()
 async def is_live() -> str:
     """Check if the PRD MCP is live."""
-    return "PRD MCP is live!"
+    logging.info("is_live function called")
+    result = "PRD MCP is live!"
+   logging.info("is_live response: %s", result)
+   logging.debug("is_live function execution completed.")
+    return result
 
 
 prd_prompt = """
@@ -54,5 +60,7 @@ async def create_prd(code_base: str) -> str:
     Args:
         code_base: The code base to create the product requirements document from, in markdown format.
     """
+    logging.info("create_prd function called with code_base: %s", code_base)
     response = await agent.run(prd_prompt.format(code_base=code_base))
+    logging.info("create_prd response: %s", response.data)
     return response.data

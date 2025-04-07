@@ -1,4 +1,18 @@
 #!/usr/bin/env node
+
+// Redirect console.error to a file
+import * as fs from 'fs';
+const logStream = fs.createWriteStream('/Users/nateaune/Documents/code/roocode_testing/security-audit-server/debug-log.txt', { flags: 'a' });
+const originalConsoleError = console.error;
+console.error = function(...args: any[]) {
+  originalConsoleError.apply(console, args);
+  const msg = args.join(' ') + '\n';
+  logStream.write(msg);
+};
+
+// Log startup
+logStream.write(`=== Server started at ${new Date().toISOString()} ===\n`);
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -16,6 +30,7 @@ import { dynamicTestingTool } from './tools/dynamic-testing.js';
 import { complianceCheckTool } from './tools/compliance-check.js';
 import { reportGeneratorTool } from './tools/report-generator.js';
 import { configUtil } from './utils/config.js';
+import logger from './utils/logger.js';
 
 /**
  * Security Audit MCP Server
@@ -310,6 +325,7 @@ class SecurityAuditServer {
   private async handleStaticCodeScan(args: any) {
     // Validate arguments
     if (!args.path) {
+      logger.warn('Static code scan called without required path parameter');
       return {
         content: [
           {
@@ -321,7 +337,7 @@ class SecurityAuditServer {
       };
     }
 
-    try {
+    return await logger.logMethod('static code scan', args, async () => {
       // Perform static code analysis
       const scanResults = await staticAnalysisTool.scanCode(
         args.path,
@@ -331,6 +347,8 @@ class SecurityAuditServer {
       
       // Store scan results for later report generation
       reportGeneratorTool.storeScanResults(scanResults.scan_id, scanResults);
+      
+      logger.info(`Static code scan completed with ID: ${scanResults.scan_id}, found ${scanResults.vulnerabilities_count} vulnerabilities`);
       
       // Return scan summary
       return {
@@ -350,19 +368,7 @@ class SecurityAuditServer {
           },
         ],
       };
-    } catch (error) {
-      console.error('Error during static code scan:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error during static code scan: ${errorMessage}`,
-          },
-        ],
-        isError: true,
-      };
-    }
+    });
   }
 
   /**
@@ -371,6 +377,7 @@ class SecurityAuditServer {
   private async handleDependencyScan(args: any) {
     // Validate arguments
     if (!args.path) {
+      logger.warn('Dependency scan called without required path parameter');
       return {
         content: [
           {
@@ -382,7 +389,7 @@ class SecurityAuditServer {
       };
     }
 
-    try {
+    return await logger.logMethod('dependency scan', args, async () => {
       // Perform dependency scan
       const scanResults = await dependencyScanTool.scanDependencies(
         args.path,
@@ -391,6 +398,8 @@ class SecurityAuditServer {
       
       // Store scan results for later report generation
       reportGeneratorTool.storeScanResults(scanResults.scan_id, scanResults);
+      
+      logger.info(`Dependency scan completed with ID: ${scanResults.scan_id}, found ${scanResults.vulnerabilities_count} vulnerabilities`);
       
       // Return scan summary
       return {
@@ -410,19 +419,7 @@ class SecurityAuditServer {
           },
         ],
       };
-    } catch (error) {
-      console.error('Error during dependency scan:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error during dependency scan: ${errorMessage}`,
-          },
-        ],
-        isError: true,
-      };
-    }
+    });
   }
 
   /**
@@ -431,6 +428,7 @@ class SecurityAuditServer {
   private async handleLiveApplicationScan(args: any) {
     // Validate arguments
     if (!args.url) {
+      logger.warn('Live application scan called without required URL parameter');
       return {
         content: [
           {
@@ -442,7 +440,7 @@ class SecurityAuditServer {
       };
     }
 
-    try {
+    return await logger.logMethod('live application scan', args, async () => {
       // Perform dynamic application security testing
       const scanResults = await dynamicTestingTool.scanLiveApplication(
         args.url,
@@ -452,6 +450,8 @@ class SecurityAuditServer {
       
       // Store scan results for later report generation
       reportGeneratorTool.storeScanResults(scanResults.scan_id, scanResults);
+      
+      logger.info(`Live application scan completed with ID: ${scanResults.scan_id}, found ${scanResults.vulnerabilities_count} vulnerabilities`);
       
       // Return scan summary
       return {
@@ -471,19 +471,7 @@ class SecurityAuditServer {
           },
         ],
       };
-    } catch (error) {
-      console.error('Error during live application scan:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error during live application scan: ${errorMessage}`,
-          },
-        ],
-        isError: true,
-      };
-    }
+    });
   }
 
   /**
@@ -492,6 +480,7 @@ class SecurityAuditServer {
   private async handleComplianceCheck(args: any) {
     // Validate arguments
     if (!args.target || !args.standard) {
+      logger.warn('Compliance check called without required parameters', args);
       return {
         content: [
           {
@@ -503,7 +492,7 @@ class SecurityAuditServer {
       };
     }
 
-    try {
+    return await logger.logMethod('compliance check', args, async () => {
       // Perform compliance check
       const checkResults = await complianceCheckTool.checkCompliance(
         args.target,
@@ -512,6 +501,8 @@ class SecurityAuditServer {
       
       // Store scan results for later report generation
       reportGeneratorTool.storeScanResults(checkResults.scan_id, checkResults);
+      
+      logger.info(`Compliance check completed with ID: ${checkResults.scan_id}, standard: ${checkResults.standard}, score: ${checkResults.compliance_score}`);
       
       // Return check summary
       return {
@@ -530,19 +521,7 @@ class SecurityAuditServer {
           },
         ],
       };
-    } catch (error) {
-      console.error('Error during compliance check:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error during compliance check: ${errorMessage}`,
-          },
-        ],
-        isError: true,
-      };
-    }
+    });
   }
 
   /**
@@ -551,6 +530,7 @@ class SecurityAuditServer {
   private async handleReportGeneration(args: any) {
     // Validate arguments
     if (!args.scan_id) {
+      logger.warn('Report generation called without required scan ID');
       return {
         content: [
           {
@@ -562,12 +542,14 @@ class SecurityAuditServer {
       };
     }
 
-    try {
+    return await logger.logMethod('report generation', args, async () => {
       // Generate report
       const reportResult = await reportGeneratorTool.generateReport(
         args.scan_id,
         args.format || configUtil.getDefaultReportFormat()
       );
+      
+      logger.info(`Report generated with ID: ${reportResult.report_id} for scan: ${reportResult.scan_id}, format: ${reportResult.format}`);
       
       // Return report metadata
       return {
@@ -586,19 +568,7 @@ class SecurityAuditServer {
           },
         ],
       };
-    } catch (error) {
-      console.error('Error during report generation:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error during report generation: ${errorMessage}`,
-          },
-        ],
-        isError: true,
-      };
-    }
+    });
   }
 
   /**
@@ -667,141 +637,25 @@ class SecurityAuditServer {
    * Get vulnerability data for a scan
    */
   private getVulnerabilityData(scanId: string) {
-    // Try to get actual scan results from the report generator
-    // In a real implementation, this would retrieve the stored scan results
-    // For now, we'll just use mock data
-    try {
-      // This is a placeholder for retrieving stored scan results
-      // In a real implementation, you would call a method to get the stored results
-      const scanResults = undefined;
-      if (scanResults) {
-        return scanResults;
-      }
-    } catch (error) {
-      console.error(`Error retrieving scan results for ${scanId}:`, error);
-    }
+    // Retrieve actual scan results using the reportGeneratorTool
+    logger.debug(`Attempting to retrieve vulnerability data for scan ID: ${scanId}`);
+    const scanResults = reportGeneratorTool.getScanResults(scanId);
     
-    // Fall back to mock data based on the scan ID
-    if (scanId.startsWith('static-')) {
-      return {
-        scan_id: scanId,
-        scan_type: "static_analysis",
-        timestamp: new Date().toISOString(),
-        vulnerabilities: [
-          {
-            id: "vuln-1",
-            type: "cross_site_scripting",
-            severity: "critical",
-            location: "src/components/UserInput.js:42",
-            description: "Unsanitized user input is directly rendered to the DOM",
-            recommendation_id: "rec-xss-1",
-          },
-          {
-            id: "vuln-2",
-            type: "sql_injection",
-            severity: "high",
-            location: "src/services/database.js:78",
-            description: "SQL query is constructed using string concatenation with user input",
-            recommendation_id: "rec-sqli-1",
-          },
-          {
-            id: "vuln-3",
-            type: "insecure_direct_object_reference",
-            severity: "high",
-            location: "src/controllers/UserController.js:105",
-            description: "User ID is taken directly from request parameters without authorization check",
-            recommendation_id: "rec-idor-1",
-          },
-          {
-            id: "vuln-4",
-            type: "insecure_configuration",
-            severity: "medium",
-            location: "config/server.js:12",
-            description: "Debug mode is enabled in production environment",
-            recommendation_id: "rec-config-1",
-          },
-          {
-            id: "vuln-5",
-            type: "hardcoded_credentials",
-            severity: "low",
-            location: "src/utils/apiClient.js:8",
-            description: "API key is hardcoded in source code",
-            recommendation_id: "rec-cred-1",
-          },
-        ],
-      };
-    } else if (scanId.startsWith('deps-')) {
-      return {
-        scan_id: scanId,
-        scan_type: "dependency_scan",
-        timestamp: new Date().toISOString(),
-        vulnerabilities: [
-          {
-            id: "dep-1",
-            package: "lodash",
-            version: "4.17.15",
-            severity: "high",
-            vulnerability: "Prototype Pollution",
-            cve: "CVE-2020-8203",
-            recommendation_id: "rec-dep-1",
-          },
-          {
-            id: "dep-2",
-            package: "axios",
-            version: "0.19.0",
-            severity: "medium",
-            vulnerability: "Server-Side Request Forgery",
-            cve: "CVE-2020-28168",
-            recommendation_id: "rec-dep-2",
-          },
-          {
-            id: "dep-3",
-            package: "express",
-            version: "4.16.0",
-            severity: "medium",
-            vulnerability: "Denial of Service",
-            cve: "CVE-2019-10768",
-            recommendation_id: "rec-dep-3",
-          },
-        ],
-      };
-    } else if (scanId.startsWith('live-')) {
-      return {
-        scan_id: scanId,
-        scan_type: "dynamic_testing",
-        timestamp: new Date().toISOString(),
-        vulnerabilities: [
-          {
-            id: "dyn-1",
-            type: "cross_site_request_forgery",
-            severity: "high",
-            endpoint: "/api/user/update",
-            description: "No CSRF token validation on state-changing operation",
-            recommendation_id: "rec-csrf-1",
-          },
-          {
-            id: "dyn-2",
-            type: "missing_security_headers",
-            severity: "medium",
-            endpoint: "/*",
-            description: "Content-Security-Policy header is not set",
-            recommendation_id: "rec-header-1",
-          },
-          {
-            id: "dyn-3",
-            type: "information_disclosure",
-            severity: "medium",
-            endpoint: "/api/error",
-            description: "Detailed error messages expose stack traces",
-            recommendation_id: "rec-info-1",
-          },
-        ],
-      };
+    if (scanResults) {
+      // Return the actual stored results
+      // Ensure the structure matches what the resource endpoint expects
+      // (Usually the full scan result object is fine)
+      logger.debug(`Found vulnerability data for scan ID: ${scanId}`);
+      return scanResults;
     } else {
-      return {
-        error: "Unknown scan ID",
-      };
+      // If no results are found for the scan ID, throw an error
+      logger.warn(`No vulnerability data found for scan ID: ${scanId}`);
+      throw new McpError(
+        ErrorCode.InvalidParams, // Or potentially a custom error code
+        `Vulnerability details not found for scan ID: ${scanId}. The scan may not exist or results might have expired.`
+      );
     }
+    // Note: The mock data fallback logic has been removed.
   }
 
   /**
@@ -936,7 +790,7 @@ class SecurityAuditServer {
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('Security Audit MCP server running on stdio');
+    logger.info('Security Audit MCP server running on stdio');
   }
 }
 
