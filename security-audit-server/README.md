@@ -108,8 +108,62 @@ access_mcp_resource({
   uri: "security://standards/owasp-top-10"
 })
 ```
+## Testing with Sample Vulnerabilities
+
+The repository includes a sample file with intentional security vulnerabilities that you can use to test the security scanning capabilities:
+
+### Testing with test-vulnerability.js
+
+The `test-vulnerability.js` file contains several intentional security vulnerabilities:
+1. Code injection via `eval()`
+2. Command injection via string concatenation with `exec()`
+3. Path traversal via unsanitized file paths
+4. Regular Expression Denial of Service (ReDoS) vulnerability
+
+To scan this file for security vulnerabilities:
+
+1. **Start the Security Audit MCP server**:
+   ```bash
+   cd security-audit-server
+   npm run build
+   npm start
+   ```
+
+2. **Scan the file using the MCP tool**:
+   ```
+   use_mcp_tool({
+     server_name: "security-audit",
+     tool_name: "scan_code_security",
+     arguments: {
+       path: "security-audit-server/test-vulnerability.js",
+       languages: ["javascript"],
+       scan_depth: "deep"
+     }
+   })
+   ```
+
+3. **View the detailed scan results**:
+   ```
+   access_mcp_resource({
+     server_name: "security-audit",
+     uri: "security://vulnerabilities/{scan_id}"
+   })
+   ```
+   Replace `{scan_id}` with the scan ID returned from the previous step.
+
+4. **Expected Results**:
+   The scan should identify at least the code injection vulnerability (use of `eval()`). The scanner uses ESLint with security rules to detect common security issues in JavaScript code.
+
+### Extending the Security Rules
+
+To detect more types of vulnerabilities, you can:
+
+1. Modify the ESLint configuration in `src/integrations/eslint/eslint-security-config.json`
+2. Add custom security rules in `src/integrations/eslint/custom-security-rules.js`
+3. Update the Docker command in `src/integrations/eslint/eslint-scanner.ts` to include additional security plugins
 
 ## Development
+
 
 The Security Audit MCP server is built with TypeScript and uses the MCP SDK. The server integrates with various security tools through Docker containers.
 

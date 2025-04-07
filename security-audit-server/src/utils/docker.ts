@@ -1,4 +1,5 @@
 import Dockerode from 'dockerode';
+import * as fs from 'fs';
 
 /**
  * Docker utility class for running security tools in containers
@@ -52,43 +53,88 @@ export class DockerUtil {
     binds: string[] = [],
     env: string[] = []
   ): Promise<string> {
-    console.error(`Running container with image: ${image}`);
-    console.error(`Command: ${cmd.join(' ')}`);
-    
+    console.error(`[DockerUtil] Attempting to run container with image: ${image}`);
+    console.error(`[DockerUtil] Command: ${cmd.join(' ')}`);
+    console.error(`[DockerUtil] Binds: ${binds.join(', ')}`);
+    console.error(`[DockerUtil] Env: ${env.join(', ')}`);
+    console.error(`[DockerUtil] Current working directory: ${process.cwd()}`);
+
     // Check if image exists locally, pull if not
     try {
+      console.log(`[DockerUtil] Checking for local image: ${image}`);
       await this.docker.getImage(image).inspect();
+      console.log(`[DockerUtil] Image ${image} found locally.`);
     } catch (error) {
-      console.error(`Image ${image} not found locally, pulling...`);
-      await this.pullImage(image);
+      console.error(`[DockerUtil] Image ${image} not found locally or error inspecting: ${error}. Pulling image...`);
+      try {
+        await this.pullImage(image);
+        console.log(`[DockerUtil] Successfully pulled image: ${image}`);
+      } catch (pullError) {
+         console.error(`[DockerUtil] FATAL: Failed to pull image ${image}: ${pullError}`);
+         throw new Error(`Failed to pull Docker image ${image}: ${pullError}`);
+      }
     }
     
     // Create container
-    const container = await this.docker.createContainer({
-      Image: image,
-      Cmd: cmd,
-      HostConfig: {
-        Binds: binds,
-        AutoRemove: true,
-      },
-      Env: env,
-      Tty: false,
-    });
-    
+    let container: Dockerode.Container;
+    try {
+      console.error(`[DockerUtil] Creating container...`);
+      console.error(`[DockerUtil] Docker info: Attempting to create container with Docker`);
+      
+      const containerConfig = {
+        Image: image,
+        Cmd: cmd,
+        HostConfig: {
+          Binds: binds,
+          AutoRemove: true, // Automatically remove container when stopped
+        },
+        Env: env,
+        Tty: false, // Non-interactive
+      };
+      
+      console.error(`[DockerUtil] Container config: ${JSON.stringify(containerConfig)}`);
+      
+      container = await this.docker.createContainer(containerConfig);
+      console.error(`[DockerUtil] Container created successfully (ID: ${container.id}).`);
+    } catch (createError) {
+       console.error(`[DockerUtil] FATAL: Failed to create container for image ${image}: ${createError}`);
+       throw new Error(`Failed to create Docker container: ${createError}`);
+    }
+
     // Start container
-    await container.start();
+    try {
+       console.error(`[DockerUtil] Starting container (ID: ${container.id})...`);
+       console.error(`[DockerUtil] Container ID: ${container.id}`);
+       console.error(`[DockerUtil] Container image: ${image}`);
+       console.error(`[DockerUtil] Container command: ${cmd.join(' ')}`);
+       console.error(`[DockerUtil] Container binds: ${binds.join(', ')}`);
+       
+       await container.start();
+       console.error(`[DockerUtil] Container started successfully.`);
+    } catch (startError) {
+       console.error(`[DockerUtil] FATAL: Failed to start container (ID: ${container.id}): ${startError}`);
+       // Attempt to remove the container if start failed
+       try { await container.remove({ force: true }); } catch (removeError) {}
+       throw new Error(`Failed to start Docker container: ${startError}`);
+    }
     
     // Wait for container to finish
-    await container.wait();
+    console.error(`[DockerUtil] Waiting for container (ID: ${container.id}) to complete...`);
+    await container.wait(); // Wait for the container to stop
+    console.error(`[DockerUtil] Container (ID: ${container.id}) finished.`);
     
     // Get container logs
+    console.error(`[DockerUtil] Fetching logs for container (ID: ${container.id})...`);
     const logs = await container.logs({
-      stdout: true,
-      stderr: true,
+      stdout: true, // Capture stdout
+      stderr: true, // Capture stderr
     });
-    
+    console.error(`[DockerUtil] Logs fetched successfully.`);
+
     // Convert logs buffer to string
-    const output = logs.toString('utf-8');
+    // Dockerode logs often include an 8-byte header per chunk, need to handle this if raw stream is used.
+    // The .toString() method here might be sufficient for simple cases.
+    const output = Buffer.isBuffer(logs) ? logs.toString('utf-8') : String(logs); // Handle potential non-buffer logs
     
     console.error(`Container execution completed`);
     
@@ -192,11 +238,10 @@ export class DockerUtil {
         'security/detect-unsafe-regex': 'error'
       }
     });
-    
     // Write ESLint config to a temporary file
-    const fs = require('fs');
     const configPath = '/tmp/eslint-config.json';
     fs.writeFileSync(configPath, eslintConfig);
+    
     
     const binds = [
       `${path}:/src:ro`,

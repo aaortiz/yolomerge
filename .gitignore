@@ -179,3 +179,6 @@ cython_debug/
 # Node
 node_modules/
 build/
+
+# Logging
+debug-log.txt

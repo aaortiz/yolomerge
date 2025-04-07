@@ -4,7 +4,7 @@
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "build": "tsc && cp src/integrations/eslint/eslint-security-config.json build/integrations/eslint/ && cp src/integrations/eslint/custom-security-rules.js build/integrations/eslint/ && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "start": "node build/index.js",
     "dev": "ts-node --esm src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,10 +15,12 @@
   "description": "MCP server for security auditing and vulnerability detection",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
+    "@types/xml2js": "^0.4.14",
     "axios": "^1.8.4",
     "dockerode": "^4.0.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@types/dockerode": "^3.3.37"

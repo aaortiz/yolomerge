@@ -1,5 +1,7 @@
-import { dockerUtil } from '../utils/docker.js';
 import { configUtil } from '../utils/config.js';
+import { eslintScanner } from '../integrations/eslint/eslint-scanner.js';
+import { banditScanner } from '../integrations/bandit/bandit-scanner.js';
+import { spotbugsScanner } from '../integrations/spotbugs/spotbugs-scanner.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -162,177 +164,19 @@ export class StaticAnalysisTool {
     switch (language) {
       case 'javascript':
       case 'typescript':
-        return await this.scanJavaScript(codePath, scanDepth);
+        return await eslintScanner.scanCode(codePath, scanDepth);
       case 'python':
-        return await this.scanPython(codePath, scanDepth);
+        return await banditScanner.scanCode(codePath, scanDepth);
       case 'java':
-        return await this.scanJava(codePath, scanDepth);
+        return await spotbugsScanner.scanCode(codePath, scanDepth);
       default:
         console.error(`Unsupported language: ${language}`);
         return [];
     }
   }
 
-  /**
-   * Scan JavaScript/TypeScript code
-   * @param codePath Path to the codebase
-   * @param scanDepth Depth of the scan
-   * @returns Array of vulnerabilities
-   */
-  private async scanJavaScript(
-    codePath: string,
-    scanDepth: 'quick' | 'standard' | 'deep'
-  ): Promise<any[]> {
-    if (!configUtil.isToolEnabled('eslint')) {
-      console.error('ESLint scanning is disabled');
-      return [];
-    }
-    
-    try {
-      // In a real implementation, this would run ESLint with security plugins
-      // For now, we'll simulate the scan with mock results
-      
-      // Simulate different scan depths
-      const scanTimeout = this.getScanTimeout(scanDepth);
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000)); // Simulate scan time
-      
-      // For demo purposes, return mock vulnerabilities
-      return [
-        {
-          id: `js-vuln-${Date.now()}-1`,
-          type: 'cross_site_scripting',
-          severity: 'critical',
-          location: `${codePath}/src/components/UserInput.js:42`,
-          description: 'Unsanitized user input is directly rendered to the DOM',
-          recommendation_id: 'rec-xss-1',
-        },
-        {
-          id: `js-vuln-${Date.now()}-2`,
-          type: 'sql_injection',
-          severity: 'high',
-          location: `${codePath}/src/services/database.js:78`,
-          description: 'SQL query is constructed using string concatenation with user input',
-          recommendation_id: 'rec-sqli-1',
-        },
-        {
-          id: `js-vuln-${Date.now()}-3`,
-          type: 'insecure_direct_object_reference',
-          severity: 'high',
-          location: `${codePath}/src/controllers/UserController.js:105`,
-          description: 'User ID is taken directly from request parameters without authorization check',
-          recommendation_id: 'rec-idor-1',
-        },
-      ];
-    } catch (error) {
-      console.error('Error scanning JavaScript/TypeScript:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Scan Python code
-   * @param codePath Path to the codebase
-   * @param scanDepth Depth of the scan
-   * @returns Array of vulnerabilities
-   */
-  private async scanPython(
-    codePath: string,
-    scanDepth: 'quick' | 'standard' | 'deep'
-  ): Promise<any[]> {
-    if (!configUtil.isToolEnabled('bandit')) {
-      console.error('Bandit scanning is disabled');
-      return [];
-    }
-    
-    try {
-      // In a real implementation, this would run Bandit
-      // For now, we'll simulate the scan with mock results
-      
-      // Simulate different scan depths
-      const scanTimeout = this.getScanTimeout(scanDepth);
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000)); // Simulate scan time
-      
-      // For demo purposes, return mock vulnerabilities
-      return [
-        {
-          id: `py-vuln-${Date.now()}-1`,
-          type: 'command_injection',
-          severity: 'critical',
-          location: `${codePath}/app/utils/system.py:23`,
-          description: 'OS command injection through unsanitized user input',
-          recommendation_id: 'rec-cmdi-1',
-        },
-        {
-          id: `py-vuln-${Date.now()}-2`,
-          type: 'weak_cryptography',
-          severity: 'medium',
-          location: `${codePath}/app/security/crypto.py:45`,
-          description: 'Use of weak cryptographic algorithm (MD5)',
-          recommendation_id: 'rec-crypto-1',
-        },
-      ];
-    } catch (error) {
-      console.error('Error scanning Python:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Scan Java code
-   * @param codePath Path to the codebase
-   * @param scanDepth Depth of the scan
-   * @returns Array of vulnerabilities
-   */
-  private async scanJava(
-    codePath: string,
-    scanDepth: 'quick' | 'standard' | 'deep'
-  ): Promise<any[]> {
-    if (!configUtil.isToolEnabled('spotbugs')) {
-      console.error('SpotBugs scanning is disabled');
-      return [];
-    }
-    
-    try {
-      // In a real implementation, this would run SpotBugs with Find Security Bugs
-      // For now, we'll simulate the scan with mock results
-      
-      // Simulate different scan depths
-      const scanTimeout = this.getScanTimeout(scanDepth);
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000)); // Simulate scan time
-      
-      // For demo purposes, return mock vulnerabilities
-      return [
-        {
-          id: `java-vuln-${Date.now()}-1`,
-          type: 'path_traversal',
-          severity: 'high',
-          location: `${codePath}/src/main/java/com/example/FileService.java:67`,
-          description: 'Path traversal vulnerability in file access',
-          recommendation_id: 'rec-path-1',
-        },
-        {
-          id: `java-vuln-${Date.now()}-2`,
-          type: 'insecure_random',
-          severity: 'medium',
-          location: `${codePath}/src/main/java/com/example/SecurityUtils.java:31`,
-          description: 'Use of java.util.Random instead of SecureRandom',
-          recommendation_id: 'rec-random-1',
-        },
-        {
-          id: `java-vuln-${Date.now()}-3`,
-          type: 'xxe',
-          severity: 'high',
-          location: `${codePath}/src/main/java/com/example/XmlParser.java:22`,
-          description: 'XML External Entity (XXE) vulnerability in XML parsing',
-          recommendation_id: 'rec-xxe-1',
-        },
-      ];
-    } catch (error) {
-      console.error('Error scanning Java:', error);
-      return [];
-    }
-  }
-
+  // Removed scanJavaScript, scanPython, and scanJava methods as they are now handled by the integration modules
+  
   /**
    * Get the scan timeout based on scan depth
    * @param scanDepth Depth of the scan

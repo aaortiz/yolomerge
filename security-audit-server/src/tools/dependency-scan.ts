@@ -1,7 +1,7 @@
-import { dockerUtil } from '../utils/docker.js';
 import { configUtil } from '../utils/config.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { dependencyCheckScanner } from '../integrations/dependency-check/dependency-check-scanner.js'; // Import the new scanner
 
 /**
  * Dependency scanning tool implementation
@@ -147,54 +147,10 @@ export class DependencyScanTool {
    * @returns Array of vulnerabilities
    */
   private async scanNpmDependencies(projectPath: string): Promise<any[]> {
-    if (!configUtil.isToolEnabled('dependencyCheck')) {
-      console.error('Dependency-Check scanning is disabled');
-      return [];
-    }
-    
-    try {
-      // In a real implementation, this would run npm audit or OWASP Dependency-Check
-      // For now, we'll simulate the scan with mock results
-      
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000)); // Simulate scan time
-      
-      // For demo purposes, return mock vulnerabilities
-      return [
-        {
-          id: `npm-vuln-${Date.now()}-1`,
-          package: 'lodash',
-          version: '4.17.15',
-          severity: 'high',
-          vulnerability: 'Prototype Pollution',
-          cve: 'CVE-2020-8203',
-          description: 'Prototype pollution vulnerability in lodash < 4.17.19',
-          recommendation_id: 'rec-dep-1',
-        },
-        {
-          id: `npm-vuln-${Date.now()}-2`,
-          package: 'axios',
-          version: '0.19.0',
-          severity: 'medium',
-          vulnerability: 'Server-Side Request Forgery',
-          cve: 'CVE-2020-28168',
-          description: 'SSRF vulnerability in axios < 0.21.1',
-          recommendation_id: 'rec-dep-2',
-        },
-        {
-          id: `npm-vuln-${Date.now()}-3`,
-          package: 'express',
-          version: '4.16.0',
-          severity: 'medium',
-          vulnerability: 'Denial of Service',
-          cve: 'CVE-2019-10768',
-          description: 'DoS vulnerability in express < 4.17.1',
-          recommendation_id: 'rec-dep-3',
-        },
-      ];
-    } catch (error) {
-      console.error('Error scanning npm dependencies:', error);
-      return [];
-    }
+    console.error(`Scanning npm dependencies using Dependency-Check for path: ${projectPath}`);
+    // Ensure projectPath is absolute for Docker volume mounting
+    const absoluteProjectPath = path.resolve(projectPath);
+    return await dependencyCheckScanner.scan(absoluteProjectPath, 'npm');
   }
 
   /**
@@ -203,44 +159,10 @@ export class DependencyScanTool {
    * @returns Array of vulnerabilities
    */
   private async scanPipDependencies(projectPath: string): Promise<any[]> {
-    if (!configUtil.isToolEnabled('dependencyCheck')) {
-      console.error('Dependency-Check scanning is disabled');
-      return [];
-    }
-    
-    try {
-      // In a real implementation, this would run safety or OWASP Dependency-Check
-      // For now, we'll simulate the scan with mock results
-      
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000)); // Simulate scan time
-      
-      // For demo purposes, return mock vulnerabilities
-      return [
-        {
-          id: `pip-vuln-${Date.now()}-1`,
-          package: 'django',
-          version: '2.2.0',
-          severity: 'high',
-          vulnerability: 'SQL Injection',
-          cve: 'CVE-2020-9402',
-          description: 'SQL injection vulnerability in Django < 2.2.10',
-          recommendation_id: 'rec-dep-4',
-        },
-        {
-          id: `pip-vuln-${Date.now()}-2`,
-          package: 'flask',
-          version: '1.0.0',
-          severity: 'medium',
-          vulnerability: 'Information Disclosure',
-          cve: 'CVE-2019-1010083',
-          description: 'Information disclosure vulnerability in Flask < 1.0.3',
-          recommendation_id: 'rec-dep-5',
-        },
-      ];
-    } catch (error) {
-      console.error('Error scanning pip dependencies:', error);
-      return [];
-    }
+    console.error(`Scanning pip dependencies using Dependency-Check for path: ${projectPath}`);
+    // Ensure projectPath is absolute for Docker volume mounting
+    const absoluteProjectPath = path.resolve(projectPath);
+    return await dependencyCheckScanner.scan(absoluteProjectPath, 'pip');
   }
 
   /**
@@ -249,44 +171,10 @@ export class DependencyScanTool {
    * @returns Array of vulnerabilities
    */
   private async scanMavenDependencies(projectPath: string): Promise<any[]> {
-    if (!configUtil.isToolEnabled('dependencyCheck')) {
-      console.error('Dependency-Check scanning is disabled');
-      return [];
-    }
-    
-    try {
-      // In a real implementation, this would run OWASP Dependency-Check
-      // For now, we'll simulate the scan with mock results
-      
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000)); // Simulate scan time
-      
-      // For demo purposes, return mock vulnerabilities
-      return [
-        {
-          id: `maven-vuln-${Date.now()}-1`,
-          package: 'org.apache.struts:struts2-core',
-          version: '2.5.16',
-          severity: 'critical',
-          vulnerability: 'Remote Code Execution',
-          cve: 'CVE-2018-11776',
-          description: 'RCE vulnerability in Apache Struts 2.5 < 2.5.17',
-          recommendation_id: 'rec-dep-6',
-        },
-        {
-          id: `maven-vuln-${Date.now()}-2`,
-          package: 'com.fasterxml.jackson.core:jackson-databind',
-          version: '2.9.8',
-          severity: 'high',
-          vulnerability: 'Deserialization of Untrusted Data',
-          cve: 'CVE-2019-12086',
-          description: 'Deserialization vulnerability in jackson-databind < 2.9.9',
-          recommendation_id: 'rec-dep-7',
-        },
-      ];
-    } catch (error) {
-      console.error('Error scanning maven dependencies:', error);
-      return [];
-    }
+    console.error(`Scanning maven dependencies using Dependency-Check for path: ${projectPath}`);
+    // Ensure projectPath is absolute for Docker volume mounting
+    const absoluteProjectPath = path.resolve(projectPath);
+    return await dependencyCheckScanner.scan(absoluteProjectPath, 'maven');
   }
 }
 

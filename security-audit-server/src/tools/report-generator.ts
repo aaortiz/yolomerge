@@ -67,15 +67,15 @@ export class ReportGeneratorTool {
    * @param scanId The ID of the scan
    * @returns The scan results or undefined if not found
    */
-  private getScanResults(scanId: string): any {
+  public getScanResults(scanId: string): any { // Changed from private to public
     // Check if we have the results in memory
     if (this.scanResults.has(scanId)) {
       return this.scanResults.get(scanId);
     }
     
-    // For demo purposes, generate mock results if not found
-    console.error(`Scan results not found for ${scanId}, generating mock results`);
-    return this.generateMockResults(scanId);
+    // If results are not found in memory, return undefined
+    console.error(`Scan results not found in memory for scan ID: ${scanId}`);
+    return undefined;
   }
   
   /**
