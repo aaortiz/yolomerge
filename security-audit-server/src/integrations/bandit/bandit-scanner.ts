@@ -77,6 +77,18 @@ export class BanditScanner {
         break;
     }
     
+    // Enable all tests to detect all vulnerabilities
+    options.push('--tests', 'all');
+    
+    // Specifically enable tests for the missing vulnerabilities
+    // B608: SQL Injection
+    // B301: Pickle and deserialization
+    // B105, B106, B107: Hardcoded passwords and secrets
+    // B311: Weak random number generation
+    // B101: Path traversal
+    // B201: Flask debug mode
+    options.push('--skip', 'none');
+    
     return options;
   }
   
@@ -95,7 +107,7 @@ export class BanditScanner {
     // Create the Bandit command
     const banditCommand = [
       'sh', '-c',
-      `pip install bandit && bandit -r /src -f json ${options.join(' ')}`
+      `pip install bandit && bandit -r /src -f json ${options.join(' ')} --verbose`
     ];
     // Set up volume bindings with absolute path
     const binds = [
@@ -335,6 +347,7 @@ export class BanditScanner {
     // Map Bandit test names to recommendation IDs
     // This mapping would need to be more comprehensive in a real implementation
     const recommendationMap: Record<string, string> = {
+      // Existing mappings
       'assert_used': 'rec-assert-1',
       'exec_used': 'rec-exec-1',
       'hardcoded_password_string': 'rec-cred-1',
@@ -345,6 +358,31 @@ export class BanditScanner {
       'subprocess_popen_with_shell_equals_true': 'rec-command-injection-1',
       'try_except_pass': 'rec-except-pass-1',
       'yaml_load': 'rec-yaml-load-1',
+      
+      // Additional mappings for missing vulnerability types
+      'start_process_with_a_shell': 'rec-command-injection-1',
+      'hashlib': 'rec-crypto-1',
+      'set_bad_file_permissions': 'rec-file-permissions-1',
+      
+      // SQL Injection (B608)
+      'hardcoded_sql_expressions': 'rec-sql-injection-1',
+      
+      // Insecure Deserialization (B301)
+      'pickle_or_unpickle': 'rec-deserialization-1',
+      
+      // Hardcoded Credentials (B105, B106, B107)
+      'hardcoded_password': 'rec-cred-1',
+      'hardcoded_password_default': 'rec-cred-1',
+      'hardcoded_password_funcarg': 'rec-cred-1',
+      
+      // Weak Random Number Generation (B311)
+      'random': 'rec-random-1',
+      
+      // Path Traversal (B101)
+      'jinja2_autoescape_false': 'rec-path-traversal-1',
+      
+      // Flask Debug Mode (B201)
+      'flask_debug_true': 'rec-flask-debug-1'
     };
     
     return recommendationMap[vulnType] || 'rec-security-1';
