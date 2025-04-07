@@ -7,8 +7,17 @@ import * as path from 'path';
  * Report generation tool implementation
  */
 export class ReportGeneratorTool {
-  // Store scan results for later report generation
-  private scanResults: Map<string, any> = new Map();
+  // Directory to store scan results
+  private scanResultsDir: string;
+  
+  constructor() {
+    // Create a directory to store scan results
+    this.scanResultsDir = path.join(process.cwd(), 'scan-results');
+    if (!fs.existsSync(this.scanResultsDir)) {
+      fs.mkdirSync(this.scanResultsDir, { recursive: true });
+    }
+    console.error(`Scan results directory: ${this.scanResultsDir}`);
+  }
   
   /**
    * Store scan results for later report generation
@@ -16,8 +25,10 @@ export class ReportGeneratorTool {
    * @param results The scan results
    */
   storeScanResults(scanId: string, results: any): void {
-    this.scanResults.set(scanId, results);
-    console.error(`Stored scan results for scan ID: ${scanId}`);
+    // Write scan results to a file
+    const filePath = path.join(this.scanResultsDir, `${scanId}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(results, null, 2));
+    console.error(`Stored scan results for scan ID: ${scanId} in file: ${filePath}`);
   }
   
   /**
@@ -67,14 +78,22 @@ export class ReportGeneratorTool {
    * @param scanId The ID of the scan
    * @returns The scan results or undefined if not found
    */
-  public getScanResults(scanId: string): any { // Changed from private to public
-    // Check if we have the results in memory
-    if (this.scanResults.has(scanId)) {
-      return this.scanResults.get(scanId);
+  public getScanResults(scanId: string): any {
+    // Check if we have the results in a file
+    const filePath = path.join(this.scanResultsDir, `${scanId}.json`);
+    if (fs.existsSync(filePath)) {
+      try {
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const scanResults = JSON.parse(fileContent);
+        console.error(`Found vulnerability data for scan ID: ${scanId} in file: ${filePath}`);
+        return scanResults;
+      } catch (error) {
+        console.error(`Error reading scan results from file: ${filePath}`, error);
+      }
     }
     
-    // If results are not found in memory, return undefined
-    console.error(`Scan results not found in memory for scan ID: ${scanId}`);
+    // If results are not found, return undefined
+    console.error(`Scan results not found for scan ID: ${scanId}`);
     return undefined;
   }
   

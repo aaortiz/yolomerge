@@ -86,7 +86,7 @@ export class DockerUtil {
         Cmd: cmd,
         HostConfig: {
           Binds: binds,
-          AutoRemove: true, // Automatically remove container when stopped
+          AutoRemove: false, // Don't automatically remove container to avoid race condition with log fetching
         },
         Env: env,
         Tty: false, // Non-interactive
@@ -122,13 +122,28 @@ export class DockerUtil {
     console.error(`[DockerUtil] Waiting for container (ID: ${container.id}) to complete...`);
     await container.wait(); // Wait for the container to stop
     console.error(`[DockerUtil] Container (ID: ${container.id}) finished.`);
-    
     // Get container logs
     console.error(`[DockerUtil] Fetching logs for container (ID: ${container.id})...`);
-    const logs = await container.logs({
-      stdout: true, // Capture stdout
-      stderr: true, // Capture stderr
-    });
+    let logs;
+    try {
+      logs = await container.logs({
+        stdout: true, // Capture stdout
+        stderr: true, // Capture stderr
+      });
+      console.error(`[DockerUtil] Logs fetched successfully.`);
+    } catch (logError) {
+      console.error(`[DockerUtil] Error fetching logs: ${logError}`);
+      logs = Buffer.from('Error fetching logs from container');
+    }
+    
+    // Clean up the container
+    try {
+      console.error(`[DockerUtil] Removing container (ID: ${container.id})...`);
+      await container.remove({ force: true });
+      console.error(`[DockerUtil] Container removed successfully.`);
+    } catch (removeError) {
+      console.error(`[DockerUtil] Error removing container: ${removeError}`);
+    }
     console.error(`[DockerUtil] Logs fetched successfully.`);
 
     // Convert logs buffer to string

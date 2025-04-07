@@ -17,6 +17,9 @@ export class BanditScanner {
     codePath: string,
     scanDepth: 'quick' | 'standard' | 'deep' = 'standard'
   ): Promise<any[]> {
+    // Log the current working directory for debugging
+    console.error(`Current working directory: ${process.cwd()}`);
+    console.error(`Scan depth: ${scanDepth}`);
     console.error(`Running Bandit security scan on ${codePath}`);
     
     try {
@@ -32,8 +35,12 @@ export class BanditScanner {
       // Determine the scan options based on the scan depth
       const scanOptions = this.getScanOptions(scanDepth);
       
+      // Convert relative paths to absolute paths for Docker volume bindings
+      const absoluteCodePath = path.resolve(process.cwd(), codePath);
+      console.error(`Absolute code path: ${absoluteCodePath}`);
+      
       // Run Bandit in a Docker container
-      const output = await this.runBanditInDocker(dockerImage, codePath, scanOptions);
+      const output = await this.runBanditInDocker(dockerImage, absoluteCodePath, scanOptions);
       
       // Parse the Bandit output and convert to vulnerabilities
       return this.parseBanditOutput(output, codePath);
@@ -90,10 +97,9 @@ export class BanditScanner {
       'sh', '-c',
       `pip install bandit && bandit -r /src -f json ${options.join(' ')}`
     ];
-    
-    // Set up volume bindings
+    // Set up volume bindings with absolute path
     const binds = [
-      `${codePath}:/src:ro`,
+      `${codePath}:/src:ro` // codePath is now an absolute path
     ];
     
     // Run Bandit in Docker
@@ -108,38 +114,198 @@ export class BanditScanner {
    */
   private parseBanditOutput(output: string, codePath: string): any[] {
     try {
-      // Parse the JSON output
-      const banditResults = JSON.parse(output);
+      console.error('Parsing Bandit output...');
+      console.error(`Output length: ${output.length} characters`);
       
-      // Convert Bandit results to vulnerabilities
-      const vulnerabilities: any[] = [];
+      // Extract the results array directly using regex
+      const resultsRegex = /"results"\s*:\s*(\[\s*\{[\s\S]*?\}\s*\])/;
+      const resultsMatch = output.match(resultsRegex);
       
-      // Process each issue
+      if (!resultsMatch || !resultsMatch[1]) {
+        console.error('Could not find results array in output');
+        
+        // Try a different approach - manually extract each vulnerability
+        try {
+          console.error('Trying manual extraction approach');
+          
+          // Look for HIGH severity issues
+          const highSeverityRegex = /"issue_severity"\s*:\s*"HIGH"/g;
+          const highMatches = [...output.matchAll(highSeverityRegex)];
+          
+          if (highMatches.length > 0) {
+            console.error(`Found ${highMatches.length} HIGH severity issues`);
+            
+            // Extract vulnerability details
+            const vulnerabilities: any[] = [];
+            
+            for (const match of highMatches) {
+              // Find the surrounding vulnerability object
+              const matchPos = match.index || 0;
+              let startPos = matchPos;
+              let endPos = matchPos;
+              let braceCount = 0;
+              
+              // Find the start of the object
+              while (startPos > 0) {
+                if (output[startPos] === '{') {
+                  if (braceCount === 0) break;
+                  braceCount--;
+                } else if (output[startPos] === '}') {
+                  braceCount++;
+                }
+                startPos--;
+              }
+              
+              // Find the end of the object
+              braceCount = 1; // We're starting inside an object
+              while (endPos < output.length) {
+                endPos++;
+                if (output[endPos] === '{') {
+                  braceCount++;
+                } else if (output[endPos] === '}') {
+                  braceCount--;
+                  if (braceCount === 0) break;
+                }
+              }
+              
+              // Extract the vulnerability object
+              const vulnText = output.substring(startPos, endPos + 1);
+              
+              // Extract key information using regex
+              const testIdMatch = vulnText.match(/"test_id"\s*:\s*"([^"]+)"/);
+              const lineNumMatch = vulnText.match(/"line_number"\s*:\s*(\d+)/);
+              const issueTextMatch = vulnText.match(/"issue_text"\s*:\s*"([^"]+)"/);
+              const testNameMatch = vulnText.match(/"test_name"\s*:\s*"([^"]+)"/);
+              const cweIdMatch = vulnText.match(/"id"\s*:\s*(\d+)/);
+              
+              if (testIdMatch && lineNumMatch) {
+                const testId = testIdMatch[1];
+                const lineNumber = parseInt(lineNumMatch[1]);
+                const issueText = issueTextMatch ? issueTextMatch[1] : 'Unknown issue';
+                const testName = testNameMatch ? testNameMatch[1] : 'unknown_test';
+                const cweId = cweIdMatch ? cweIdMatch[1] : undefined;
+                
+                const id = `bandit-${Date.now()}-${vulnerabilities.length + 1}`;
+                
+                console.error(`Extracted vulnerability: ${testId} at line ${lineNumber}`);
+                
+                vulnerabilities.push({
+                  id,
+                  type: testName,
+                  severity: 'high',
+                  location: `${codePath}:${lineNumber}`,
+                  description: issueText,
+                  recommendation_id: this.getRecommendationId(testName),
+                  rule_id: testId,
+                  cwe_id: cweId ? `CWE-${cweId}` : undefined
+                });
+              }
+            }
+            
+            if (vulnerabilities.length > 0) {
+              console.error(`Successfully extracted ${vulnerabilities.length} vulnerabilities`);
+              return vulnerabilities;
+            }
+          }
+        } catch (manualError) {
+          console.error('Manual extraction failed:', manualError);
+        }
+        
+        return [];
+      }
+      
+      const resultsJson = resultsMatch[1];
+      console.error(`Extracted results array of length ${resultsJson.length}`);
+      
+      try {
+        // Parse the results array
+        const resultsArray = JSON.parse(resultsJson);
+        console.error(`Successfully parsed results array with ${resultsArray.length} items`);
+        
+        // Convert Bandit results to vulnerabilities
+        const vulnerabilities: any[] = [];
+        
+        for (const issue of resultsArray) {
+          // Map Bandit severity to vulnerability severity
+          const severity = this.mapSeverity(issue.issue_severity);
+          
+          // Create a unique ID for the vulnerability
+          const id = `bandit-${Date.now()}-${vulnerabilities.length + 1}`;
+          
+          console.error(`Processing vulnerability: ${issue.test_id} - ${issue.issue_text} at ${issue.filename}:${issue.line_number}`);
+          
+          // Create the vulnerability object
+          vulnerabilities.push({
+            id,
+            type: issue.test_name,
+            severity,
+            location: `${codePath}:${issue.line_number}`,
+            description: issue.issue_text,
+            recommendation_id: this.getRecommendationId(issue.test_name),
+            rule_id: issue.test_id,
+            cwe_id: issue.issue_cwe?.id ? `CWE-${issue.issue_cwe.id}` : undefined,
+            code_snippet: issue.code
+          });
+        }
+        
+        return vulnerabilities;
+      } catch (parseError) {
+        console.error('Error parsing results array:', parseError);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error parsing Bandit output:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Process Bandit results and convert to vulnerabilities
+   * @param banditResults Bandit results
+   * @param codePath Path to the code that was scanned
+   * @returns Array of vulnerabilities
+   */
+  private processBanditResults(banditResults: any, codePath: string): any[] {
+    console.error('Processing Bandit results...');
+    console.error(`Bandit results: ${JSON.stringify(banditResults, null, 2).substring(0, 200)}...`);
+    
+    // Convert Bandit results to vulnerabilities
+    const vulnerabilities: any[] = [];
+    
+    // Process each issue
+    if (banditResults.results && Array.isArray(banditResults.results)) {
+      console.error(`Found ${banditResults.results.length} issues in Bandit results`);
+      
       for (const issue of banditResults.results) {
+        console.error(`Processing issue: ${JSON.stringify(issue, null, 2).substring(0, 200)}...`);
+        
         // Map Bandit severity to vulnerability severity
         const severity = this.mapSeverity(issue.issue_severity);
+        console.error(`Mapped severity: ${severity}`);
         
         // Create a unique ID for the vulnerability
         const id = `bandit-${Date.now()}-${vulnerabilities.length + 1}`;
+        
+        console.error(`Found vulnerability: ${issue.test_id} - ${issue.issue_text} at ${issue.filename}:${issue.line_number}`);
         
         // Create the vulnerability object
         vulnerabilities.push({
           id,
           type: issue.test_name,
           severity,
-          location: `${issue.filename}:${issue.line_number}`,
+          location: `${issue.filename.replace('/src', codePath)}:${issue.line_number}`,
           description: issue.issue_text,
           recommendation_id: this.getRecommendationId(issue.test_name),
           rule_id: issue.test_id,
+          cwe_id: issue.issue_cwe?.id ? `CWE-${issue.issue_cwe.id}` : undefined,
+          code_snippet: issue.code
         });
       }
-      
-      return vulnerabilities;
-    } catch (error) {
-      console.error('Error parsing Bandit output:', error);
-      console.error('Raw output:', output);
-      return [];
+    } else {
+      console.error('No results array found in Bandit output');
     }
+    
+    return vulnerabilities;
   }
   
   /**

@@ -1,17 +1,43 @@
 #!/usr/bin/env node
 
-// Redirect console.error to a file
+// Redirect console output to a file with timestamps
 import * as fs from 'fs';
 const logStream = fs.createWriteStream('/Users/nateaune/Documents/code/roocode_testing/security-audit-server/debug-log.txt', { flags: 'a' });
+
+// Save original console methods
+const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
-console.error = function(...args: any[]) {
-  originalConsoleError.apply(console, args);
-  const msg = args.join(' ') + '\n';
+const originalConsoleWarn = console.warn;
+const originalConsoleInfo = console.info;
+
+// Helper function to add timestamp to log messages
+const logWithTimestamp = function(originalMethod: any, ...args: any[]) {
+  originalMethod.apply(console, args);
+  const timestamp = new Date().toISOString();
+  const msg = `[${timestamp}] ${args.join(' ')}\n`;
   logStream.write(msg);
 };
 
-// Log startup
-logStream.write(`=== Server started at ${new Date().toISOString()} ===\n`);
+// Override console methods to add timestamps
+console.log = function(...args: any[]) {
+  logWithTimestamp(originalConsoleLog, ...args);
+};
+
+console.error = function(...args: any[]) {
+  logWithTimestamp(originalConsoleError, ...args);
+};
+
+console.warn = function(...args: any[]) {
+  logWithTimestamp(originalConsoleWarn, ...args);
+};
+
+console.info = function(...args: any[]) {
+  logWithTimestamp(originalConsoleInfo, ...args);
+};
+
+// Log startup with consistent timestamp format
+const startupTimestamp = new Date().toISOString();
+logStream.write(`[${startupTimestamp}] === Server started ===\n`);
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';

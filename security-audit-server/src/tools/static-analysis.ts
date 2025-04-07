@@ -51,6 +51,8 @@ export class StaticAnalysisTool {
     for (const language of languages) {
       try {
         const languageResults = await this.scanLanguage(codePath, language, scanDepth);
+        console.error(`Language ${language} scan results: ${JSON.stringify(languageResults, null, 2).substring(0, 200)}...`);
+        console.error(`Found ${languageResults.length} vulnerabilities for language ${language}`);
         results.vulnerabilities.push(...languageResults);
       } catch (error) {
         console.error(`Error scanning ${language}:`, error);
@@ -161,18 +163,30 @@ export class StaticAnalysisTool {
   ): Promise<any[]> {
     console.error(`Scanning ${language} code in ${codePath}`);
     
+    let results: any[] = [];
+    
     switch (language) {
       case 'javascript':
       case 'typescript':
-        return await eslintScanner.scanCode(codePath, scanDepth);
+        results = await eslintScanner.scanCode(codePath, scanDepth);
+        console.error(`ESLint scanner returned ${results.length} vulnerabilities`);
+        break;
       case 'python':
-        return await banditScanner.scanCode(codePath, scanDepth);
+        console.error(`Calling Bandit scanner for ${codePath}`);
+        results = await banditScanner.scanCode(codePath, scanDepth);
+        console.error(`Bandit scanner returned ${results ? results.length : 0} vulnerabilities`);
+        console.error(`Bandit scanner results: ${JSON.stringify(results, null, 2).substring(0, 200)}...`);
+        break;
       case 'java':
-        return await spotbugsScanner.scanCode(codePath, scanDepth);
+        results = await spotbugsScanner.scanCode(codePath, scanDepth);
+        console.error(`SpotBugs scanner returned ${results.length} vulnerabilities`);
+        break;
       default:
         console.error(`Unsupported language: ${language}`);
-        return [];
+        break;
     }
+    
+    return results || [];
   }
 
   // Removed scanJavaScript, scanPython, and scanJava methods as they are now handled by the integration modules
